@@ -1,14 +1,20 @@
 import { createInertiaApp } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import { createApp, h, type DefineComponent } from 'vue'
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
+// PrimeVue
+import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
+    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     layout: (name) => {
         switch (true) {
             case name === 'Welcome':
@@ -20,6 +26,17 @@ createInertiaApp({
             default:
                 return AppLayout;
         }
+    },
+    // PrimeVue
+    setup({ el, App, props, plugin }) {
+        createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(PrimeVue, {
+                theme: {
+                    preset: Aura
+                }
+            })
+            .mount(el)
     },
     progress: {
         color: '#4B5563',
