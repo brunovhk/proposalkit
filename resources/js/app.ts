@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import Aura from '@primeuix/themes/aura';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import PrimeVue from 'primevue/config';
+import Ripple from 'primevue/ripple';
 import ToastService from 'primevue/toastservice';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
@@ -40,6 +41,7 @@ createInertiaApp({
         const vueApp = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(PrimeVue, {
+                ripple: true,
                 theme: {
                     preset: Aura,
                     options: {
@@ -51,7 +53,8 @@ createInertiaApp({
                     },
                 },
             })
-            .use(ToastService);
+            .use(ToastService)
+            .directive('ripple', Ripple);
 
         initializeFlashToast(vueApp.config.globalProperties.$toast);
 

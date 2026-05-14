@@ -15,6 +15,7 @@ defineProps<Props>();
         <a
             v-for="item in items"
             :key="item.title"
+            v-ripple
             :href="toUrl(item.href)"
             target="_blank"
             rel="noopener noreferrer"
