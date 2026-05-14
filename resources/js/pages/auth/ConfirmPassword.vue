@@ -1,52 +1,54 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { store } from '@/routes/password/confirm';
 
-defineOptions({
-    layout: {
-        title: 'Confirm your password',
-        description:
-            'This is a secure area of the application. Please confirm your password before continuing.',
-    },
+const { t } = useTranslations();
+
+watchEffect(() => {
+    setLayoutProps({
+        title: t('ui.auth.confirm_password.title'),
+        description: t('ui.auth.confirm_password.description'),
+    });
 });
 </script>
 
 <template>
-    <Head title="Confirm password" />
+    <Head :title="t('ui.auth.confirm_password.head')" />
 
     <Form
         v-bind="store.form()"
         reset-on-success
         v-slot="{ errors, processing }"
     >
-        <div class="space-y-6">
-            <div class="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+        <div class="space-y-5">
+            <div class="space-y-2">
+                <label for="password" class="text-sm font-medium">
+                    {{ t('ui.fields.password') }}
+                </label>
                 <PasswordInput
                     id="password"
                     name="password"
-                    class="mt-1 block w-full"
                     required
                     autocomplete="current-password"
                     autofocus
+                    :invalid="Boolean(errors.password)"
                 />
 
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center pt-1">
                 <Button
-                    class="w-full"
+                    fluid
                     :disabled="processing"
+                    :loading="processing"
                     data-test="confirm-password-button"
                 >
-                    <Spinner v-if="processing" />
-                    Confirm password
+                    {{ t('ui.auth.confirm_password.submit') }}
                 </Button>
             </div>
         </div>

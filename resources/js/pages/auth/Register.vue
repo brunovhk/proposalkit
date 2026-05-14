@@ -1,108 +1,123 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
-defineOptions({
-    layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
-    },
+const { t } = useTranslations();
+
+watchEffect(() => {
+    setLayoutProps({
+        title: t('ui.auth.register.title'),
+        description: t('ui.auth.register.description'),
+    });
 });
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head :title="t('ui.auth.register.head')" />
 
     <Form
         v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        class="space-y-6"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="name">Name</Label>
-                <Input
+        <div class="space-y-5">
+            <div class="space-y-2">
+                <label for="name" class="text-sm font-medium">
+                    {{ t('ui.fields.name') }}
+                </label>
+                <InputText
                     id="name"
                     type="text"
+                    fluid
                     required
                     autofocus
                     :tabindex="1"
                     autocomplete="name"
                     name="name"
-                    placeholder="Full name"
+                    :placeholder="t('ui.fields.name')"
+                    :invalid="Boolean(errors.name)"
                 />
                 <InputError :message="errors.name" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
+            <div class="space-y-2">
+                <label for="email" class="text-sm font-medium">
+                    {{ t('ui.fields.email_address') }}
+                </label>
+                <InputText
                     id="email"
                     type="email"
+                    fluid
                     required
                     :tabindex="2"
                     autocomplete="email"
                     name="email"
-                    placeholder="email@example.com"
+                    :placeholder="t('ui.fields.email_placeholder')"
+                    :invalid="Boolean(errors.email)"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
+            <div class="space-y-2">
+                <label for="password" class="text-sm font-medium">
+                    {{ t('ui.fields.password') }}
+                </label>
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Password"
+                    :placeholder="t('ui.fields.password')"
+                    :invalid="Boolean(errors.password)"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+            <div class="space-y-2">
+                <label for="password_confirmation" class="text-sm font-medium">
+                    {{ t('ui.fields.confirm_password') }}
+                </label>
                 <PasswordInput
                     id="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="Confirm password"
+                    :placeholder="t('ui.fields.confirm_password')"
+                    :invalid="Boolean(errors.password_confirmation)"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
+                fluid
                 tabindex="5"
                 :disabled="processing"
+                :loading="processing"
                 data-test="register-user-button"
             >
-                <Spinner v-if="processing" />
-                Create account
+                {{ t('ui.auth.register.submit') }}
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Already have an account?
+        <div class="text-center text-sm text-surface-500 dark:text-surface-400">
+            {{ t('ui.auth.register.already_registered') }}
             <TextLink
                 :href="login()"
                 class="underline underline-offset-4"
                 :tabindex="6"
-                >Log in</TextLink
             >
+                {{ t('ui.auth.login.submit') }}
+            </TextLink>
         </div>
     </Form>
 </template>

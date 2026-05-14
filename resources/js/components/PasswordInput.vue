@@ -1,46 +1,39 @@
 <script setup lang="ts">
-import { Eye, EyeOff } from 'lucide-vue-next';
-import { ref, useTemplateRef } from 'vue';
-import type { HTMLAttributes } from 'vue';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { computed, useAttrs, useTemplateRef } from 'vue';
+
+type PasswordInputClass = string | Record<string, boolean>;
 
 defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
-    class?: HTMLAttributes['class'];
+    class?: PasswordInputClass;
 }>();
 
-const showPassword = ref(false);
-const inputRef = useTemplateRef('inputRef');
+const attrs = useAttrs();
+const passwordRef = useTemplateRef('passwordRef');
+const inputId = computed(() =>
+    typeof attrs.id === 'string' ? attrs.id : undefined,
+);
 
 defineExpose({
-    $el: inputRef,
-    focus: () => inputRef.value?.$el?.focus(),
+    $el: passwordRef,
+    focus: () => {
+        const element = (passwordRef.value as { $el?: HTMLElement } | null)
+            ?.$el;
+
+        element?.querySelector<HTMLInputElement>('input')?.focus();
+    },
 });
 </script>
 
 <template>
-    <div class="relative">
-        <Input
-            ref="inputRef"
-            :type="showPassword ? 'text' : 'password'"
-            :class="cn('pr-10', props.class)"
-            v-bind="$attrs"
-        />
-        <button
-            type="button"
-            @click="showPassword = !showPassword"
-            :class="
-                cn(
-                    'absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none',
-                )
-            "
-            :aria-label="showPassword ? 'Hide password' : 'Show password'"
-            :tabindex="-1"
-        >
-            <EyeOff v-if="showPassword" class="size-4" />
-            <Eye v-else class="size-4" />
-        </button>
-    </div>
+    <Password
+        ref="passwordRef"
+        :input-id="inputId"
+        :input-class="props.class"
+        :feedback="false"
+        toggle-mask
+        fluid
+        v-bind="$attrs"
+    />
 </template>

@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
-
-defineOptions({
-    layout: {
-        title: 'Verify email',
-        description:
-            'Please verify your email address by clicking on the link we just emailed to you.',
-    },
-});
 
 defineProps<{
     status?: string;
 }>();
+
+const { t } = useTranslations();
+
+watchEffect(() => {
+    setLayoutProps({
+        title: t('ui.auth.verify_email.title'),
+        description: t('ui.auth.verify_email.description'),
+    });
+});
 </script>
 
 <template>
-    <Head title="Email verification" />
+    <Head :title="t('ui.auth.verify_email.head')" />
 
     <div
         v-if="status === 'verification-link-sent'"
         class="mb-4 text-center text-sm font-medium text-green-600"
     >
-        A new verification link has been sent to the email address you provided
-        during registration.
+        {{ t('ui.auth.verify_email.sent') }}
     </div>
 
     <Form
@@ -35,13 +35,17 @@ defineProps<{
         class="space-y-6 text-center"
         v-slot="{ processing }"
     >
-        <Button :disabled="processing" variant="secondary">
-            <Spinner v-if="processing" />
-            Resend verification email
+        <Button
+            fluid
+            :disabled="processing"
+            :loading="processing"
+            severity="secondary"
+        >
+            {{ t('ui.auth.verify_email.submit') }}
         </Button>
 
         <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
-            Log out
+            {{ t('ui.user_menu.logout') }}
         </TextLink>
     </Form>
 </template>

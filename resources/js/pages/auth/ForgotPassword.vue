@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
-
-defineOptions({
-    layout: {
-        title: 'Forgot password',
-        description: 'Enter your email to receive a password reset link',
-    },
-});
 
 defineProps<{
     status?: string;
 }>();
+
+const { t } = useTranslations();
+
+watchEffect(() => {
+    setLayoutProps({
+        title: t('ui.auth.forgot_password.title'),
+        description: t('ui.auth.forgot_password.description'),
+    });
+});
 </script>
 
 <template>
-    <Head title="Forgot password" />
+    <Head :title="t('ui.auth.forgot_password.head')" />
 
     <div
         v-if="status"
@@ -32,35 +32,45 @@ defineProps<{
     </div>
 
     <div class="space-y-6">
-        <Form v-bind="email.form()" v-slot="{ errors, processing }">
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
+        <Form
+            v-bind="email.form()"
+            v-slot="{ errors, processing }"
+            class="space-y-5"
+        >
+            <div class="space-y-2">
+                <label for="email" class="text-sm font-medium">
+                    {{ t('ui.fields.email_address') }}
+                </label>
+                <InputText
                     id="email"
                     type="email"
                     name="email"
+                    fluid
                     autocomplete="off"
                     autofocus
-                    placeholder="email@example.com"
+                    :placeholder="t('ui.fields.email_placeholder')"
+                    :invalid="Boolean(errors.email)"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="my-6 flex items-center justify-start">
+            <div class="flex items-center pt-1">
                 <Button
-                    class="w-full"
+                    fluid
                     :disabled="processing"
+                    :loading="processing"
                     data-test="email-password-reset-link-button"
                 >
-                    <Spinner v-if="processing" />
-                    Email password reset link
+                    {{ t('ui.auth.forgot_password.submit') }}
                 </Button>
             </div>
         </Form>
 
-        <div class="space-x-1 text-center text-sm text-muted-foreground">
-            <span>Or, return to</span>
-            <TextLink :href="login()">log in</TextLink>
+        <div
+            class="space-x-1 text-center text-sm text-surface-500 dark:text-surface-400"
+        >
+            <span>{{ t('ui.auth.forgot_password.return') }}</span>
+            <TextLink :href="login()">{{ t('ui.auth.login.submit') }}</TextLink>
         </div>
     </div>
 </template>

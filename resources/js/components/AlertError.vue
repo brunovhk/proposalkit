@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import { AlertCircle } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useTranslations } from '@/composables/useTranslations';
 
 type Props = {
     errors: string[];
     title?: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {
-    title: 'Something went wrong.',
-});
+const props = defineProps<Props>();
 
+const { t } = useTranslations();
 const uniqueErrors = computed(() => Array.from(new Set(props.errors)));
+const title = computed(() => props.title ?? t('ui.messages.error_title'));
 </script>
 
 <template>
-    <Alert variant="destructive">
-        <AlertCircle class="size-4" />
-        <AlertTitle>{{ title }}</AlertTitle>
-        <AlertDescription>
+    <Message severity="error" :closable="false">
+        <div class="space-y-2">
+            <p class="font-medium">{{ title }}</p>
             <ul class="list-inside list-disc text-sm">
                 <li v-for="(error, index) in uniqueErrors" :key="index">
                     {{ error }}
                 </li>
             </ul>
-        </AlertDescription>
-    </Alert>
+        </div>
+    </Message>
 </template>

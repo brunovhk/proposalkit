@@ -3,18 +3,12 @@ import { Form } from '@inertiajs/vue3';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-vue-next';
 import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
 import AlertError from '@/components/AlertError.vue';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { useTranslations } from '@/composables/useTranslations';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
 const { recoveryCodesList, fetchRecoveryCodes, errors } = useTwoFactorAuth();
+const { t } = useTranslations();
 const isRecoveryCodesVisible = ref<boolean>(false);
 const recoveryCodeSectionRef = useTemplateRef('recoveryCodeSectionRef');
 
@@ -39,27 +33,32 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Card class="w-full">
-        <CardHeader>
-            <CardTitle class="flex gap-3">
-                <LockKeyhole class="size-4" />2FA recovery codes
-            </CardTitle>
-            <CardDescription>
-                Recovery codes let you regain access if you lose your 2FA
-                device. Store them in a secure password manager.
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <section
+        class="w-full rounded-lg border border-surface-200 p-5 dark:border-surface-700"
+    >
+        <header class="space-y-2">
+            <h2 class="flex items-center gap-3 font-semibold">
+                <LockKeyhole class="size-4" />
+                {{ t('ui.two_factor.recovery_codes.title') }}
+            </h2>
+            <p class="text-sm text-surface-500 dark:text-surface-400">
+                {{ t('ui.two_factor.recovery_codes.body') }}
+            </p>
+        </header>
+        <div class="mt-5">
             <div
                 class="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between"
             >
-                <Button @click="toggleRecoveryCodesVisibility" class="w-fit">
+                <Button @click="toggleRecoveryCodesVisibility">
                     <component
                         :is="isRecoveryCodesVisible ? EyeOff : Eye"
                         class="size-4"
                     />
-                    {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} recovery
-                    codes
+                    {{
+                        isRecoveryCodesVisible
+                            ? t('ui.two_factor.recovery_codes.hide')
+                            : t('ui.two_factor.recovery_codes.view')
+                    }}
                 </Button>
 
                 <Form
@@ -71,11 +70,12 @@ onMounted(async () => {
                     #default="{ processing }"
                 >
                     <Button
-                        variant="secondary"
+                        severity="secondary"
                         type="submit"
                         :disabled="processing"
                     >
-                        <RefreshCw /> Regenerate codes
+                        <RefreshCw class="size-4" />
+                        {{ t('ui.two_factor.recovery_codes.regenerate') }}
                     </Button>
                 </Form>
             </div>
@@ -93,13 +93,13 @@ onMounted(async () => {
                 <div v-else class="mt-3 space-y-3">
                     <div
                         ref="recoveryCodeSectionRef"
-                        class="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
+                        class="grid gap-1 rounded-lg bg-surface-100 p-4 font-mono text-sm dark:bg-surface-800"
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div
                                 v-for="n in 8"
                                 :key="n"
-                                class="h-4 animate-pulse rounded bg-muted-foreground/20"
+                                class="h-4 animate-pulse rounded bg-surface-500/20 dark:bg-surface-400/20"
                             ></div>
                         </div>
                         <div
@@ -110,14 +110,13 @@ onMounted(async () => {
                             {{ code }}
                         </div>
                     </div>
-                    <p class="text-xs text-muted-foreground select-none">
-                        Each recovery code can be used once to access your
-                        account and will be removed after use. If you need more,
-                        click
-                        <span class="font-bold">Regenerate codes</span> above.
+                    <p
+                        class="text-xs text-surface-500 select-none dark:text-surface-400"
+                    >
+                        {{ t('ui.two_factor.recovery_codes.hint') }}
                     </p>
                 </div>
             </div>
-        </CardContent>
-    </Card>
+        </div>
+    </section>
 </template>

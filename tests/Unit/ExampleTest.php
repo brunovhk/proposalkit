@@ -9,8 +9,8 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_that_true_is_true()
+    public function test_database_starts_without_users(): void
     {
-        $this->assertTrue(true);
+        $this->assertDatabaseCount('users', 0);
     }
 }
