@@ -35,12 +35,12 @@ watchEffect(() => {
         class="space-y-6 text-center"
         v-slot="{ processing }"
     >
-        <Button :disabled="processing" severity="secondary">
-            <ProgressSpinner
-                v-if="processing"
-                class="size-4"
-                stroke-width="4"
-            />
+        <Button
+            fluid
+            :disabled="processing"
+            :loading="processing"
+            severity="secondary"
+        >
             {{ t('ui.auth.verify_email.submit') }}
         </Button>
 

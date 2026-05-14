@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import type { HTMLAttributes } from 'vue';
+
+type PasswordInputClass = string | Record<string, boolean>;
 
 defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
-    class?: HTMLAttributes['class'];
+    class?: PasswordInputClass;
 }>();
 
 const attrs = useAttrs();
@@ -29,7 +30,7 @@ defineExpose({
     <Password
         ref="passwordRef"
         :input-id="inputId"
-        :input-class="['w-full', props.class]"
+        :input-class="props.class"
         :feedback="false"
         toggle-mask
         fluid

@@ -25,10 +25,10 @@ watchEffect(() => {
         v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        class="space-y-6"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
+        <div class="space-y-5">
+            <div class="space-y-2">
                 <label for="name" class="text-sm font-medium">
                     {{ t('ui.fields.name') }}
                 </label>
@@ -42,11 +42,12 @@ watchEffect(() => {
                     autocomplete="name"
                     name="name"
                     :placeholder="t('ui.fields.name')"
+                    :invalid="Boolean(errors.name)"
                 />
                 <InputError :message="errors.name" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <label for="email" class="text-sm font-medium">
                     {{ t('ui.fields.email_address') }}
                 </label>
@@ -59,11 +60,12 @@ watchEffect(() => {
                     autocomplete="email"
                     name="email"
                     :placeholder="t('ui.fields.email_placeholder')"
+                    :invalid="Boolean(errors.email)"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.password') }}
                 </label>
@@ -74,11 +76,12 @@ watchEffect(() => {
                     autocomplete="new-password"
                     name="password"
                     :placeholder="t('ui.fields.password')"
+                    :invalid="Boolean(errors.password)"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <label for="password_confirmation" class="text-sm font-medium">
                     {{ t('ui.fields.confirm_password') }}
                 </label>
@@ -89,22 +92,19 @@ watchEffect(() => {
                     autocomplete="new-password"
                     name="password_confirmation"
                     :placeholder="t('ui.fields.confirm_password')"
+                    :invalid="Boolean(errors.password_confirmation)"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
+                fluid
                 tabindex="5"
                 :disabled="processing"
+                :loading="processing"
                 data-test="register-user-button"
             >
-                <ProgressSpinner
-                    v-if="processing"
-                    class="size-4"
-                    stroke-width="4"
-                />
                 {{ t('ui.auth.register.submit') }}
             </Button>
         </div>

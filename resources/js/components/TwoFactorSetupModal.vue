@@ -181,8 +181,8 @@ watch(
                         </div>
                     </div>
 
-                    <div class="flex w-full items-center space-x-5">
-                        <Button class="w-full" @click="handleModalNextStep">
+                    <div class="flex w-full items-center">
+                        <Button fluid @click="handleModalNextStep">
                             {{ modalConfig.buttonText }}
                         </Button>
                     </div>
@@ -217,7 +217,7 @@ watch(
                                 <InputText
                                     readonly
                                     :value="manualSetupKey"
-                                    class="h-full w-full bg-background p-3 text-foreground"
+                                    fluid
                                 />
                                 <Button
                                     type="button"
@@ -226,7 +226,7 @@ watch(
                                         t('ui.two_factor.setup.copy_key')
                                     "
                                     @click="copy(manualSetupKey || '')"
-                                    class="relative block h-auto border-l border-border px-3 hover:bg-muted"
+                                    class="relative block h-auto rounded-none border-l border-border px-3"
                                 >
                                     <Check
                                         v-if="copied"
@@ -273,7 +273,7 @@ watch(
                             <Button
                                 type="button"
                                 outlined
-                                class="w-auto flex-1"
+                                class="flex-1"
                                 @click="showVerificationStep = false"
                                 :disabled="processing"
                             >
@@ -281,8 +281,9 @@ watch(
                             </Button>
                             <Button
                                 type="submit"
-                                class="w-auto flex-1"
+                                class="flex-1"
                                 :disabled="processing || code.length < 6"
+                                :loading="processing"
                             >
                                 {{ t('ui.actions.confirm') }}
                             </Button>

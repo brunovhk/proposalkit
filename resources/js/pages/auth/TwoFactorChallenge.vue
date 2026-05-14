@@ -49,7 +49,7 @@ const code = ref<string>('');
         <template v-if="!showRecoveryInput">
             <Form
                 v-bind="store.form()"
-                class="space-y-4"
+                class="space-y-5"
                 reset-on-error
                 @error="code = ''"
                 #default="{ errors, processing, clearErrors }"
@@ -71,7 +71,12 @@ const code = ref<string>('');
                     </div>
                     <InputError :message="errors.code" />
                 </div>
-                <Button type="submit" class="w-full" :disabled="processing">
+                <Button
+                    type="submit"
+                    fluid
+                    :disabled="processing"
+                    :loading="processing"
+                >
                     {{ t('ui.actions.continue') }}
                 </Button>
                 <div class="text-center text-sm text-muted-foreground">
@@ -90,7 +95,7 @@ const code = ref<string>('');
         <template v-else>
             <Form
                 v-bind="store.form()"
-                class="space-y-4"
+                class="space-y-5"
                 reset-on-error
                 #default="{ errors, processing, clearErrors }"
             >
@@ -103,9 +108,15 @@ const code = ref<string>('');
                     "
                     :autofocus="showRecoveryInput"
                     required
+                    :invalid="Boolean(errors.recovery_code)"
                 />
                 <InputError :message="errors.recovery_code" />
-                <Button type="submit" class="w-full" :disabled="processing">
+                <Button
+                    type="submit"
+                    fluid
+                    :disabled="processing"
+                    :loading="processing"
+                >
                     {{ t('ui.actions.continue') }}
                 </Button>
 

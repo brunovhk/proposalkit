@@ -24,34 +24,30 @@ watchEffect(() => {
         reset-on-success
         v-slot="{ errors, processing }"
     >
-        <div class="space-y-6">
-            <div class="grid gap-2">
+        <div class="space-y-5">
+            <div class="space-y-2">
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.password') }}
                 </label>
                 <PasswordInput
                     id="password"
                     name="password"
-                    class="mt-1 block w-full"
                     required
                     autocomplete="current-password"
                     autofocus
+                    :invalid="Boolean(errors.password)"
                 />
 
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center pt-1">
                 <Button
-                    class="w-full"
+                    fluid
                     :disabled="processing"
+                    :loading="processing"
                     data-test="confirm-password-button"
                 >
-                    <ProgressSpinner
-                        v-if="processing"
-                        class="size-4"
-                        stroke-width="4"
-                    />
                     {{ t('ui.auth.confirm_password.submit') }}
                 </Button>
             </div>

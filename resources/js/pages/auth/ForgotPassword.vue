@@ -32,8 +32,12 @@ watchEffect(() => {
     </div>
 
     <div class="space-y-6">
-        <Form v-bind="email.form()" v-slot="{ errors, processing }">
-            <div class="grid gap-2">
+        <Form
+            v-bind="email.form()"
+            v-slot="{ errors, processing }"
+            class="space-y-5"
+        >
+            <div class="space-y-2">
                 <label for="email" class="text-sm font-medium">
                     {{ t('ui.fields.email_address') }}
                 </label>
@@ -45,21 +49,18 @@ watchEffect(() => {
                     autocomplete="off"
                     autofocus
                     :placeholder="t('ui.fields.email_placeholder')"
+                    :invalid="Boolean(errors.email)"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="my-6 flex items-center justify-start">
+            <div class="flex items-center pt-1">
                 <Button
-                    class="w-full"
+                    fluid
                     :disabled="processing"
+                    :loading="processing"
                     data-test="email-password-reset-link-button"
                 >
-                    <ProgressSpinner
-                        v-if="processing"
-                        class="size-4"
-                        stroke-width="4"
-                    />
                     {{ t('ui.auth.forgot_password.submit') }}
                 </Button>
             </div>

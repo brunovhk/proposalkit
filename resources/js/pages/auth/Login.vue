@@ -39,10 +39,10 @@ watchEffect(() => {
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        class="space-y-6"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
+        <div class="space-y-5">
+            <div class="space-y-2">
                 <label for="email" class="text-sm font-medium">
                     {{ t('ui.fields.email_address') }}
                 </label>
@@ -56,11 +56,12 @@ watchEffect(() => {
                     :tabindex="1"
                     autocomplete="email"
                     :placeholder="t('ui.fields.email_placeholder')"
+                    :invalid="Boolean(errors.email)"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <label for="password" class="text-sm font-medium">
                         {{ t('ui.fields.password') }}
@@ -81,12 +82,16 @@ watchEffect(() => {
                     :tabindex="2"
                     autocomplete="current-password"
                     :placeholder="t('ui.fields.password')"
+                    :invalid="Boolean(errors.password)"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center justify-between">
-                <label for="remember" class="flex items-center gap-3 text-sm">
+            <div class="flex items-center">
+                <label
+                    for="remember"
+                    class="inline-flex items-center gap-3 text-sm leading-none"
+                >
                     <Checkbox
                         input-id="remember"
                         name="remember"
@@ -99,16 +104,12 @@ watchEffect(() => {
 
             <Button
                 type="submit"
-                class="mt-4 w-full"
+                fluid
                 :tabindex="4"
                 :disabled="processing"
+                :loading="processing"
                 data-test="login-button"
             >
-                <ProgressSpinner
-                    v-if="processing"
-                    class="size-4"
-                    stroke-width="4"
-                />
                 {{ t('ui.auth.login.submit') }}
             </Button>
         </div>

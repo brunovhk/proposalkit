@@ -30,9 +30,10 @@ watchEffect(() => {
         :transform="(data) => ({ ...data, token, email })"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
+        class="space-y-5"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
+        <div class="space-y-5">
+            <div class="space-y-2">
                 <label for="email" class="text-sm font-medium">
                     {{ t('ui.fields.email') }}
                 </label>
@@ -43,13 +44,13 @@ watchEffect(() => {
                     autocomplete="email"
                     v-model="inputEmail"
                     fluid
-                    class="mt-1 block w-full"
                     readonly
+                    :invalid="Boolean(errors.email)"
                 />
-                <InputError :message="errors.email" class="mt-2" />
+                <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.password') }}
                 </label>
@@ -57,14 +58,14 @@ watchEffect(() => {
                     id="password"
                     name="password"
                     autocomplete="new-password"
-                    class="mt-1 block w-full"
                     autofocus
                     :placeholder="t('ui.fields.password')"
+                    :invalid="Boolean(errors.password)"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="space-y-2">
                 <label for="password_confirmation" class="text-sm font-medium">
                     {{ t('ui.fields.confirm_password') }}
                 </label>
@@ -72,23 +73,19 @@ watchEffect(() => {
                     id="password_confirmation"
                     name="password_confirmation"
                     autocomplete="new-password"
-                    class="mt-1 block w-full"
                     :placeholder="t('ui.fields.confirm_password')"
+                    :invalid="Boolean(errors.password_confirmation)"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-4 w-full"
+                fluid
                 :disabled="processing"
+                :loading="processing"
                 data-test="reset-password-button"
             >
-                <ProgressSpinner
-                    v-if="processing"
-                    class="size-4"
-                    stroke-width="4"
-                />
                 {{ t('ui.auth.reset_password.submit') }}
             </Button>
         </div>

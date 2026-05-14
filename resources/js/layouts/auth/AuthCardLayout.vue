@@ -11,7 +11,7 @@ defineProps<{
 
 <template>
     <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10"
+        class="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-8 sm:px-6 lg:px-8"
     >
         <div class="flex w-full max-w-md flex-col gap-6">
             <Link
@@ -26,16 +26,20 @@ defineProps<{
             </Link>
 
             <div class="flex flex-col gap-6">
-                <section class="rounded-lg border border-border bg-card">
+                <section
+                    class="rounded-lg border border-border bg-card shadow-sm"
+                >
                     <header class="px-10 pt-8 pb-0 text-center">
-                        <h1 class="text-xl font-semibold">{{ title }}</h1>
+                        <h1 class="text-xl font-semibold text-foreground">
+                            {{ title }}
+                        </h1>
                         <p class="mt-2 text-sm text-muted-foreground">
                             {{ description }}
                         </p>
                     </header>
-                    <div class="px-10 py-8">
+                    <Fluid class="px-6 py-8 sm:px-10">
                         <slot />
-                    </div>
+                    </Fluid>
                 </section>
             </div>
         </div>
