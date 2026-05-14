@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid, Menu } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import { Menu } from 'lucide-vue-next';
+import { onUnmounted, ref } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import { useNavigation } from '@/composables/useNavigation';
 import { useTranslations } from '@/composables/useTranslations';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
-import type { NavItem } from '@/types';
 
 withDefaults(
     defineProps<{
@@ -23,27 +23,15 @@ withDefaults(
 
 const { t } = useTranslations();
 const visible = ref(false);
+const { mainNavItems, footerNavItems } = useNavigation();
 
-const mainNavItems = computed<NavItem[]>(() => [
-    {
-        title: t('ui.nav.dashboard'),
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-]);
+const removeFinishListener = router.on('finish', () => {
+    visible.value = false;
+});
 
-const footerNavItems = computed<NavItem[]>(() => [
-    {
-        title: t('ui.nav.repository'),
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: t('ui.nav.documentation'),
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-]);
+onUnmounted(() => {
+    removeFinishListener();
+});
 </script>
 
 <template>
