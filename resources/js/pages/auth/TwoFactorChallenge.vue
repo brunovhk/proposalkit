@@ -2,31 +2,25 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { computed, ref, watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSlot,
-} from '@/components/ui/input-otp';
+import { useTranslations } from '@/composables/useTranslations';
 import { store } from '@/routes/two-factor/login';
 import type { TwoFactorConfigContent } from '@/types';
+
+const { t } = useTranslations();
 
 const authConfigContent = computed<TwoFactorConfigContent>(() => {
     if (showRecoveryInput.value) {
         return {
-            title: 'Recovery code',
-            description:
-                'Please confirm access to your account by entering one of your emergency recovery codes.',
-            buttonText: 'login using an authentication code',
+            title: t('ui.auth.two_factor.recovery_code.title'),
+            description: t('ui.auth.two_factor.recovery_code.description'),
+            buttonText: t('ui.auth.two_factor.recovery_code.switch'),
         };
     }
 
     return {
-        title: 'Authentication code',
-        description:
-            'Enter the authentication code provided by your authenticator application.',
-        buttonText: 'login using a recovery code',
+        title: t('ui.auth.two_factor.auth_code.title'),
+        description: t('ui.auth.two_factor.auth_code.description'),
+        buttonText: t('ui.auth.two_factor.auth_code.switch'),
     };
 });
 
@@ -49,7 +43,7 @@ const code = ref<string>('');
 </script>
 
 <template>
-    <Head title="Two-factor authentication" />
+    <Head :title="t('ui.auth.two_factor.head')" />
 
     <div class="space-y-6">
         <template v-if="!showRecoveryInput">
@@ -68,26 +62,20 @@ const code = ref<string>('');
                         <InputOTP
                             id="otp"
                             v-model="code"
-                            :maxlength="6"
+                            :length="6"
+                            integer-only
                             :disabled="processing"
+                            :invalid="Boolean(errors.code)"
                             autofocus
-                        >
-                            <InputOTPGroup>
-                                <InputOTPSlot
-                                    v-for="index in 6"
-                                    :key="index"
-                                    :index="index - 1"
-                                />
-                            </InputOTPGroup>
-                        </InputOTP>
+                        />
                     </div>
                     <InputError :message="errors.code" />
                 </div>
-                <Button type="submit" class="w-full" :disabled="processing"
-                    >Continue</Button
-                >
+                <Button type="submit" class="w-full" :disabled="processing">
+                    {{ t('ui.actions.continue') }}
+                </Button>
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>or you can </span>
+                    <span>{{ t('ui.auth.two_factor.switch_prefix') }} </span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
@@ -106,20 +94,23 @@ const code = ref<string>('');
                 reset-on-error
                 #default="{ errors, processing, clearErrors }"
             >
-                <Input
+                <InputText
                     name="recovery_code"
                     type="text"
-                    placeholder="Enter recovery code"
+                    fluid
+                    :placeholder="
+                        t('ui.auth.two_factor.recovery_code.placeholder')
+                    "
                     :autofocus="showRecoveryInput"
                     required
                 />
                 <InputError :message="errors.recovery_code" />
-                <Button type="submit" class="w-full" :disabled="processing"
-                    >Continue</Button
-                >
+                <Button type="submit" class="w-full" :disabled="processing">
+                    {{ t('ui.actions.continue') }}
+                </Button>
 
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>or you can </span>
+                    <span>{{ t('ui.auth.two_factor.switch_prefix') }} </span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

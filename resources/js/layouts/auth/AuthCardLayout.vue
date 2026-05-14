@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { home } from '@/routes';
 
 defineProps<{
@@ -33,17 +26,17 @@ defineProps<{
             </Link>
 
             <div class="flex flex-col gap-6">
-                <Card class="rounded-xl">
-                    <CardHeader class="px-10 pt-8 pb-0 text-center">
-                        <CardTitle class="text-xl">{{ title }}</CardTitle>
-                        <CardDescription>
+                <section class="rounded-lg border border-border bg-card">
+                    <header class="px-10 pt-8 pb-0 text-center">
+                        <h1 class="text-xl font-semibold">{{ title }}</h1>
+                        <p class="mt-2 text-sm text-muted-foreground">
                             {{ description }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="px-10 py-8">
+                        </p>
+                    </header>
+                    <div class="px-10 py-8">
                         <slot />
-                    </CardContent>
-                </Card>
+                    </div>
+                </section>
             </div>
         </div>
     </div>

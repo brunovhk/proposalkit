@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { ref, watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { update } from '@/routes/password';
-
-defineOptions({
-    layout: {
-        title: 'Reset password',
-        description: 'Please enter your new password below',
-    },
-});
 
 const props = defineProps<{
     token: string;
     email: string;
 }>();
 
+const { t } = useTranslations();
 const inputEmail = ref(props.email);
+
+watchEffect(() => {
+    setLayoutProps({
+        title: t('ui.auth.reset_password.title'),
+        description: t('ui.auth.reset_password.description'),
+    });
+});
 </script>
 
 <template>
-    <Head title="Reset password" />
+    <Head :title="t('ui.auth.reset_password.head')" />
 
     <Form
         v-bind="update.form()"
@@ -35,13 +33,16 @@ const inputEmail = ref(props.email);
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">Email</Label>
-                <Input
+                <label for="email" class="text-sm font-medium">
+                    {{ t('ui.fields.email') }}
+                </label>
+                <InputText
                     id="email"
                     type="email"
                     name="email"
                     autocomplete="email"
                     v-model="inputEmail"
+                    fluid
                     class="mt-1 block w-full"
                     readonly
                 />
@@ -49,26 +50,30 @@ const inputEmail = ref(props.email);
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">Password</Label>
+                <label for="password" class="text-sm font-medium">
+                    {{ t('ui.fields.password') }}
+                </label>
                 <PasswordInput
                     id="password"
                     name="password"
                     autocomplete="new-password"
                     class="mt-1 block w-full"
                     autofocus
-                    placeholder="Password"
+                    :placeholder="t('ui.fields.password')"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation"> Confirm password </Label>
+                <label for="password_confirmation" class="text-sm font-medium">
+                    {{ t('ui.fields.confirm_password') }}
+                </label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     autocomplete="new-password"
                     class="mt-1 block w-full"
-                    placeholder="Confirm password"
+                    :placeholder="t('ui.fields.confirm_password')"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
@@ -79,8 +84,12 @@ const inputEmail = ref(props.email);
                 :disabled="processing"
                 data-test="reset-password-button"
             >
-                <Spinner v-if="processing" />
-                Reset password
+                <ProgressSpinner
+                    v-if="processing"
+                    class="size-4"
+                    stroke-width="4"
+                />
+                {{ t('ui.auth.reset_password.submit') }}
             </Button>
         </div>
     </Form>

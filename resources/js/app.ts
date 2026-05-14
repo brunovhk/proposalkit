@@ -1,20 +1,26 @@
 import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { createApp, h, type DefineComponent } from 'vue'
+import Aura from '@primeuix/themes/aura';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import { createApp, h } from 'vue';
+import type { DefineComponent } from 'vue';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 // PrimeVue
-import PrimeVue from 'primevue/config'
-import Aura from '@primeuix/themes/aura'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
+    resolve: (name) =>
+        resolvePageComponent(
+            `./pages/${name}.vue`,
+            import.meta.glob<DefineComponent>('./pages/**/*.vue'),
+        ),
     layout: (name) => {
         switch (true) {
             case name === 'Welcome':
@@ -29,14 +35,18 @@ createInertiaApp({
     },
     // PrimeVue
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        const vueApp = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(PrimeVue, {
                 theme: {
-                    preset: Aura
-                }
+                    preset: Aura,
+                },
             })
-            .mount(el)
+            .use(ToastService);
+
+        initializeFlashToast(vueApp.config.globalProperties.$toast);
+
+        vueApp.mount(el);
     },
     progress: {
         color: '#4B5563',
@@ -45,6 +55,3 @@ createInertiaApp({
 
 // This will set light / dark mode on page load...
 initializeTheme();
-
-// This will listen for flash toast data from the server...
-initializeFlashToast();

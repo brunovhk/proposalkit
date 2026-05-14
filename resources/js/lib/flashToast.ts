@@ -1,8 +1,15 @@
 import { router } from '@inertiajs/vue3';
-import { toast } from 'vue-sonner';
+import type { ToastServiceMethods } from 'primevue/toastservice';
 import type { FlashToast } from '@/types/ui';
 
-export function initializeFlashToast(): void {
+const severity = {
+    success: 'success',
+    info: 'info',
+    warning: 'warn',
+    error: 'error',
+} as const;
+
+export function initializeFlashToast(toast: ToastServiceMethods): void {
     router.on('flash', (event) => {
         const flash = (event as CustomEvent).detail?.flash;
         const data = flash?.toast as FlashToast | undefined;
@@ -11,6 +18,10 @@ export function initializeFlashToast(): void {
             return;
         }
 
-        toast[data.type](data.message);
+        toast.add({
+            severity: severity[data.type],
+            summary: data.message,
+            life: 4000,
+        });
     });
 }
