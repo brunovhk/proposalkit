@@ -66,7 +66,9 @@ watchEffect(() => {
             </div>
         </Form>
 
-        <div class="space-x-1 text-center text-sm text-muted-foreground">
+        <div
+            class="space-x-1 text-center text-sm text-surface-500 dark:text-surface-400"
+        >
             <span>{{ t('ui.auth.forgot_password.return') }}</span>
             <TextLink :href="login()">{{ t('ui.auth.login.submit') }}</TextLink>
         </div>

@@ -55,7 +55,7 @@ const { t } = useTranslations();
                     class="space-y-6"
                     v-slot="{ errors, processing, reset, clearErrors }"
                 >
-                    <p class="text-sm text-muted-foreground">
+                    <p class="text-sm text-surface-500 dark:text-surface-400">
                         {{ t('ui.settings.delete_user.confirm_description') }}
                     </p>
 

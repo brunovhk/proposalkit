@@ -33,13 +33,15 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="w-full rounded-lg border border-border p-5">
+    <section
+        class="w-full rounded-lg border border-surface-200 p-5 dark:border-surface-700"
+    >
         <header class="space-y-2">
             <h2 class="flex items-center gap-3 font-semibold">
                 <LockKeyhole class="size-4" />
                 {{ t('ui.two_factor.recovery_codes.title') }}
             </h2>
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-surface-500 dark:text-surface-400">
                 {{ t('ui.two_factor.recovery_codes.body') }}
             </p>
         </header>
@@ -91,13 +93,13 @@ onMounted(async () => {
                 <div v-else class="mt-3 space-y-3">
                     <div
                         ref="recoveryCodeSectionRef"
-                        class="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
+                        class="grid gap-1 rounded-lg bg-surface-100 p-4 font-mono text-sm dark:bg-surface-800"
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div
                                 v-for="n in 8"
                                 :key="n"
-                                class="h-4 animate-pulse rounded bg-muted-foreground/20"
+                                class="h-4 animate-pulse rounded bg-surface-500/20 dark:bg-surface-400/20"
                             ></div>
                         </div>
                         <div
@@ -108,7 +110,9 @@ onMounted(async () => {
                             {{ code }}
                         </div>
                     </div>
-                    <p class="text-xs text-muted-foreground select-none">
+                    <p
+                        class="text-xs text-surface-500 select-none dark:text-surface-400"
+                    >
                         {{ t('ui.two_factor.recovery_codes.hint') }}
                     </p>
                 </div>

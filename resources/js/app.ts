@@ -43,6 +43,10 @@ createInertiaApp({
                 theme: {
                     preset: Aura,
                     options: {
+                        cssLayer: {
+                            name: 'primevue',
+                            order: 'theme, base, primevue',
+                        },
                         darkModeSelector: '.dark',
                     },
                 },

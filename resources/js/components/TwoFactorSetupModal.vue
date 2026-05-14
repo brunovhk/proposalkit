@@ -107,10 +107,10 @@ watch(
                 class="flex w-full flex-col items-center justify-center gap-2 text-center"
             >
                 <div
-                    class="mb-3 w-auto rounded-full border border-border bg-card p-0.5 shadow-sm"
+                    class="mb-3 w-auto rounded-full border border-surface-200 bg-surface-0 p-0.5 shadow-sm dark:border-surface-700 dark:bg-surface-900"
                 >
                     <div
-                        class="relative overflow-hidden rounded-full border border-border bg-muted p-2.5"
+                        class="relative overflow-hidden rounded-full border border-surface-200 bg-surface-100 p-2.5 dark:border-surface-700 dark:bg-surface-800"
                     >
                         <div
                             class="absolute inset-0 grid grid-cols-5 opacity-50"
@@ -118,7 +118,7 @@ watch(
                             <div
                                 v-for="i in 5"
                                 :key="`col-${i}`"
-                                class="border-r border-border last:border-r-0"
+                                class="border-r border-surface-200 last:border-r-0 dark:border-surface-700"
                             />
                         </div>
                         <div
@@ -127,16 +127,18 @@ watch(
                             <div
                                 v-for="i in 5"
                                 :key="`row-${i}`"
-                                class="border-b border-border last:border-b-0"
+                                class="border-b border-surface-200 last:border-b-0 dark:border-surface-700"
                             />
                         </div>
                         <ScanLine
-                            class="relative z-20 size-6 text-foreground"
+                            class="relative z-20 size-6 text-surface-900 dark:text-surface-0"
                         />
                     </div>
                 </div>
                 <h2 class="text-lg font-semibold">{{ modalConfig.title }}</h2>
-                <p class="max-w-sm text-sm text-muted-foreground">
+                <p
+                    class="max-w-sm text-sm text-surface-500 dark:text-surface-400"
+                >
                     {{ modalConfig.description }}
                 </p>
             </div>
@@ -152,11 +154,11 @@ watch(
                         class="relative mx-auto flex max-w-md items-center overflow-hidden"
                     >
                         <div
-                            class="relative mx-auto aspect-square w-64 overflow-hidden rounded-lg border border-border"
+                            class="relative mx-auto aspect-square w-64 overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700"
                         >
                             <div
                                 v-if="!qrCodeSvg"
-                                class="absolute inset-0 z-10 flex aspect-square h-auto w-full animate-pulse items-center justify-center bg-background"
+                                class="absolute inset-0 z-10 flex aspect-square h-auto w-full animate-pulse items-center justify-center bg-surface-0 dark:bg-surface-900"
                             >
                                 <ProgressSpinner
                                     class="size-6"
@@ -193,7 +195,9 @@ watch(
                         <div
                             class="absolute inset-0 top-1/2 h-px w-full bg-border"
                         />
-                        <span class="relative bg-card px-2 py-1">
+                        <span
+                            class="relative bg-surface-0 px-2 py-1 dark:bg-surface-900"
+                        >
                             {{ t('ui.two_factor.setup.manual_separator') }}
                         </span>
                     </div>
@@ -202,11 +206,11 @@ watch(
                         class="flex w-full items-center justify-center space-x-2"
                     >
                         <div
-                            class="flex w-full items-stretch overflow-hidden rounded-xl border border-border"
+                            class="flex w-full items-stretch overflow-hidden rounded-xl border border-surface-200 dark:border-surface-700"
                         >
                             <div
                                 v-if="!manualSetupKey"
-                                class="flex h-full w-full items-center justify-center bg-muted p-3"
+                                class="flex h-full w-full items-center justify-center bg-surface-100 p-3 dark:bg-surface-800"
                             >
                                 <ProgressSpinner
                                     class="size-5"
@@ -226,7 +230,7 @@ watch(
                                         t('ui.two_factor.setup.copy_key')
                                     "
                                     @click="copy(manualSetupKey || '')"
-                                    class="relative block h-auto rounded-none border-l border-border px-3"
+                                    class="relative block h-auto rounded-none border-l border-surface-200 px-3 dark:border-surface-700"
                                 >
                                     <Check
                                         v-if="copied"

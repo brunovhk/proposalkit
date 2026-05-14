@@ -115,7 +115,7 @@ watchEffect(() => {
         </div>
 
         <div
-            class="text-center text-sm text-muted-foreground"
+            class="text-center text-sm text-surface-500 dark:text-surface-400"
             v-if="canRegister"
         >
             {{ t('ui.auth.login.no_account') }}

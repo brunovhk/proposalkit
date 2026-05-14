@@ -36,7 +36,7 @@ const footerNavItems = computed<NavItem[]>(() => [
 
 <template>
     <aside
-        class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex"
+        class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-surface-200 bg-surface-0 lg:flex dark:border-surface-700 dark:bg-surface-900"
     >
         <div class="flex h-16 items-center px-4">
             <Link :href="dashboard()" class="flex items-center gap-2">
@@ -48,7 +48,9 @@ const footerNavItems = computed<NavItem[]>(() => [
             <NavMain :items="mainNavItems" />
         </div>
 
-        <div class="space-y-3 border-t border-sidebar-border p-3">
+        <div
+            class="space-y-3 border-t border-surface-200 p-3 dark:border-surface-700"
+        >
             <NavFooter :items="footerNavItems" />
             <NavUser />
         </div>

@@ -66,7 +66,7 @@ const toggleUserMenu = (event: Event): void => {
 
 <template>
     <div>
-        <div class="border-b border-sidebar-border/80">
+        <div class="border-b border-surface-200/80 dark:border-surface-700/80">
             <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
@@ -93,7 +93,7 @@ const toggleUserMenu = (event: Event): void => {
                             v-for="item in mainNavItems"
                             :key="item.title"
                             :href="item.href"
-                            class="relative flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            class="relative flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-0"
                             :class="whenCurrentUrl(item.href, activeItemStyles)"
                         >
                             <component
@@ -104,7 +104,7 @@ const toggleUserMenu = (event: Event): void => {
                             {{ item.title }}
                             <span
                                 v-if="isCurrentUrl(item.href)"
-                                class="absolute inset-x-0 -bottom-[13px] h-0.5 bg-foreground"
+                                class="absolute inset-x-0 -bottom-[13px] h-0.5 bg-surface-900 dark:bg-surface-0"
                             />
                         </Link>
                     </nav>
@@ -181,7 +181,7 @@ const toggleUserMenu = (event: Event): void => {
 
         <div
             v-if="props.breadcrumbs.length > 1"
-            class="flex w-full border-b border-sidebar-border/70"
+            class="flex w-full border-b border-surface-200/70 dark:border-surface-700/70"
         >
             <div
                 class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"
@@ -206,7 +206,7 @@ const toggleUserMenu = (event: Event): void => {
                             v-for="item in mainNavItems"
                             :key="item.title"
                             :href="item.href"
-                            class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                            class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-200 dark:hover:bg-surface-700"
                             :class="whenCurrentUrl(item.href, activeItemStyles)"
                         >
                             <component
@@ -225,7 +225,7 @@ const toggleUserMenu = (event: Event): void => {
                         :href="toUrl(item.href)"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-200 dark:hover:bg-surface-700"
                     >
                         <component
                             v-if="item.icon"
@@ -234,7 +234,9 @@ const toggleUserMenu = (event: Event): void => {
                         />
                         <span>{{ item.title }}</span>
                     </a>
-                    <div class="mt-4 border-t border-border pt-4">
+                    <div
+                        class="mt-4 border-t border-surface-200 pt-4 dark:border-surface-700"
+                    >
                         <UserInfo :user="auth.user" :show-email="true" />
                     </div>
                 </div>

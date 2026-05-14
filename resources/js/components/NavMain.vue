@@ -15,7 +15,7 @@ const { t } = useTranslations();
 <template>
     <nav class="space-y-1 px-2" :aria-label="t('ui.nav.platform')">
         <p
-            class="px-3 pb-2 text-xs font-medium text-muted-foreground uppercase"
+            class="px-3 pb-2 text-xs font-medium text-surface-500 uppercase dark:text-surface-400"
         >
             {{ t('ui.nav.platform') }}
         </p>
@@ -23,9 +23,10 @@ const { t } = useTranslations();
             v-for="item in items"
             :key="item.title"
             :href="item.href"
-            class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-0"
             :class="{
-                'bg-muted text-foreground': isCurrentUrl(item.href),
+                'bg-surface-100 text-surface-900 dark:bg-surface-800 dark:text-surface-0':
+                    isCurrentUrl(item.href),
             }"
         >
             <component v-if="item.icon" :is="item.icon" class="size-4" />

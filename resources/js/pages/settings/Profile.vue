@@ -85,12 +85,12 @@ watchEffect(() => {
             </div>
 
             <div v-if="mustVerifyEmail && !user.email_verified_at">
-                <p class="-mt-4 text-sm text-muted-foreground">
+                <p class="-mt-4 text-sm text-surface-500 dark:text-surface-400">
                     {{ t('ui.settings.profile.email_unverified') }}
                     <Link
                         :href="send()"
                         as="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        class="text-surface-900 underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:text-surface-0 dark:decoration-neutral-500"
                     >
                         {{ t('ui.settings.profile.resend_verification') }}
                     </Link>

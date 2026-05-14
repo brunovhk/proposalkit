@@ -109,7 +109,7 @@ watchEffect(() => {
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <div class="text-center text-sm text-surface-500 dark:text-surface-400">
             {{ t('ui.auth.register.already_registered') }}
             <TextLink
                 :href="login()"

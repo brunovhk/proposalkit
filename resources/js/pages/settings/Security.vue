@@ -133,7 +133,7 @@ onUnmounted(() => clearTwoFactorAuthData());
             v-if="!twoFactorEnabled"
             class="flex flex-col items-start justify-start space-y-4"
         >
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-surface-500 dark:text-surface-400">
                 {{ t('ui.settings.security.two_factor_disabled_body') }}
             </p>
 
@@ -156,7 +156,7 @@ onUnmounted(() => clearTwoFactorAuthData());
         </div>
 
         <div v-else class="flex flex-col items-start justify-start space-y-4">
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-surface-500 dark:text-surface-400">
                 {{ t('ui.settings.security.two_factor_enabled_body') }}
             </p>
 

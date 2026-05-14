@@ -6,6 +6,7 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
+import NavUser from '@/components/NavUser.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -47,7 +48,7 @@ const footerNavItems = computed<NavItem[]>(() => [
 
 <template>
     <header
-        class="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border/70 px-4 lg:px-6"
+        class="flex h-16 shrink-0 items-center gap-3 border-b border-surface-200/70 px-4 lg:px-6 dark:border-surface-700/70"
     >
         <Button
             type="button"
@@ -80,6 +81,7 @@ const footerNavItems = computed<NavItem[]>(() => [
                     <NavMain :items="mainNavItems" />
                 </div>
                 <NavFooter :items="footerNavItems" />
+                <NavUser />
             </div>
         </Drawer>
     </header>

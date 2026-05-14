@@ -40,24 +40,29 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
                 <nav
-                    class="flex flex-col space-y-1 space-x-0"
+                    class="flex flex-col gap-1"
                     :aria-label="t('ui.settings.title')"
                 >
-                    <Button
+                    <Link
                         v-for="item in sidebarNavItems"
                         :key="toUrl(item.href)"
-                        as-child
-                        text
+                        :href="item.href"
                         :class="[
-                            'w-full justify-start',
-                            { 'bg-muted': isCurrentOrParentUrl(item.href) },
+                            'rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-200 dark:hover:bg-surface-700',
+                            isCurrentOrParentUrl(item.href)
+                                ? 'bg-surface-100 text-surface-900 dark:bg-surface-800 dark:text-surface-0'
+                                : 'text-surface-500 dark:text-surface-400',
                         ]"
                     >
-                        <Link :href="item.href">
-                            <component :is="item.icon" class="h-4 w-4" />
+                        <span class="flex items-center gap-2">
+                            <component
+                                :is="item.icon"
+                                v-if="item.icon"
+                                class="h-4 w-4"
+                            />
                             {{ item.title }}
-                        </Link>
-                    </Button>
+                        </span>
+                    </Link>
                 </nav>
             </aside>
 
