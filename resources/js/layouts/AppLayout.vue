@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { computed, watch } from 'vue';
 import { useTranslations } from '@/composables/useTranslations';

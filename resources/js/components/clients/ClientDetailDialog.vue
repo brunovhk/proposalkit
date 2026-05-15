@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Dialog from 'primevue/dialog';
 import { computed } from 'vue';
 import { useTranslations } from '@/composables/useTranslations';
 
