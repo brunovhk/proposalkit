@@ -59,7 +59,8 @@ class ServiceController extends Controller
     {
         $createService->execute($request->validated());
 
-        return to_route('services.index');
+        return to_route('services.index')
+            ->with('success', __('ui.services.created'));
     }
 
     /**
@@ -85,7 +86,8 @@ class ServiceController extends Controller
     ): RedirectResponse {
         $updateService->execute($service, $request->validated());
 
-        return to_route('services.index');
+        return to_route('services.index')
+            ->with('success', __('ui.services.updated'));
     }
 
     /**
@@ -98,7 +100,8 @@ class ServiceController extends Controller
     ): RedirectResponse {
         $deleteService->execute($service);
 
-        return to_route('services.index');
+        return to_route('services.index')
+            ->with('success', __('ui.services.deleted'));
     }
 
     /**

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
@@ -8,6 +8,7 @@ import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
+import ServiceDetailDialog from '@/components/services/ServiceDetailDialog.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 type ServiceRecord = {
@@ -36,10 +37,20 @@ type Props = {
 const props = defineProps<Props>();
 
 const { t } = useTranslations();
+const selectedService = ref<ServiceRecord | null>(null);
 const servicePendingDelete = ref<ServiceRecord | null>(null);
 
 const servicesUrl = '/services';
 const createServiceUrl = '/services/create';
+
+const detailDialogVisible = computed({
+    get: () => selectedService.value !== null,
+    set: (visible: boolean) => {
+        if (!visible) {
+            selectedService.value = null;
+        }
+    },
+});
 
 const deleteDialogVisible = computed({
     get: () => servicePendingDelete.value !== null,
@@ -60,6 +71,10 @@ watchEffect(() => {
         ],
     });
 });
+
+function viewService(service: ServiceRecord): void {
+    selectedService.value = service;
+}
 
 function requestDelete(service: ServiceRecord): void {
     servicePendingDelete.value = service;
@@ -123,11 +138,13 @@ function destroyService(): void {
 
                 <Column :header="t('ui.services.table.description')">
                     <template #body="{ data }: { data: ServiceRecord }">
-                        <span
-                            class="line-clamp-2 text-sm text-surface-600 dark:text-surface-300"
+                        <button
+                            type="button"
+                            class="line-clamp-2 max-w-xl text-left text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-300 dark:hover:text-surface-0"
+                            @click="viewService(data)"
                         >
                             {{ data.description ?? '' }}
-                        </span>
+                        </button>
                     </template>
                 </Column>
 
@@ -156,6 +173,14 @@ function destroyService(): void {
                 <Column :header="t('ui.services.table.actions')">
                     <template #body="{ data }: { data: ServiceRecord }">
                         <div class="flex items-center justify-end gap-2">
+                            <Button
+                                severity="secondary"
+                                variant="text"
+                                :aria-label="t('ui.services.actions.view')"
+                                @click="viewService(data)"
+                            >
+                                <Eye class="size-4" />
+                            </Button>
                             <Link :href="data.urls.edit">
                                 <Button
                                     severity="secondary"
@@ -187,6 +212,11 @@ function destroyService(): void {
             </DataTable>
         </div>
     </div>
+
+    <ServiceDetailDialog
+        v-model:visible="detailDialogVisible"
+        :service="selectedService"
+    />
 
     <Dialog
         v-model:visible="deleteDialogVisible"

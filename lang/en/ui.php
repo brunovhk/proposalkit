@@ -11,6 +11,7 @@ return [
         'save' => 'Save',
         'delete' => 'Delete',
         'edit' => 'Edit',
+        'view' => 'View',
     ],
     'auth' => [
         'confirm_password' => [
@@ -83,6 +84,7 @@ return [
     ],
     'messages' => [
         'error_title' => 'Something went wrong.',
+        'success_title' => 'Success',
     ],
     'nav' => [
         'appearance' => 'Appearance',
@@ -102,10 +104,16 @@ return [
             'create' => 'Create service',
             'delete' => 'Delete service',
             'save' => 'Save service',
+            'view' => 'View service',
         ],
         'confirm_delete' => [
             'body' => 'This service will be removed from your catalog.',
             'title' => 'Delete :name?',
+        ],
+        'created' => 'Service created.',
+        'deleted' => 'Service deleted.',
+        'detail' => [
+            'title' => 'Service details',
         ],
         'empty' => 'No services found.',
         'fields' => [
@@ -143,6 +151,7 @@ return [
             'fixed' => 'Fixed',
             'hourly' => 'Hourly',
         ],
+        'updated' => 'Service updated.',
     ],
     'settings' => [
         'delete_user' => [

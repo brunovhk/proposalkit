@@ -47,13 +47,58 @@ class ServiceCatalogUiTest extends TestCase
                 'price' => 75_000,
                 'type' => ServiceType::Fixed->value,
             ])
-            ->assertRedirect('/services');
+            ->assertRedirect('/services')
+            ->assertSessionHas('success', __('ui.services.created'));
 
         $this->assertDatabaseHas('services', [
             'tenant_id' => $user->tenant_id,
             'name' => 'Proposal Workshop',
             'price' => 75_000,
             'type' => ServiceType::Fixed->value,
+        ]);
+    }
+
+    public function test_user_can_update_service_with_success_feedback(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $service = Service::factory()->for($tenant)->create([
+            'name' => 'Original Service',
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->put("/services/{$service->id}", [
+                'name' => 'Updated Service',
+                'description' => null,
+                'price' => 95_000,
+                'type' => ServiceType::Hourly->value,
+            ])
+            ->assertRedirect('/services')
+            ->assertSessionHas('success', __('ui.services.updated'));
+
+        $this->assertDatabaseHas('services', [
+            'id' => $service->id,
+            'name' => 'Updated Service',
+            'price' => 95_000,
+            'type' => ServiceType::Hourly->value,
+        ]);
+    }
+
+    public function test_user_can_delete_service_with_success_feedback(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $service = Service::factory()->for($tenant)->create();
+
+        $this
+            ->actingAs($user)
+            ->delete("/services/{$service->id}")
+            ->assertRedirect('/services')
+            ->assertSessionHas('success', __('ui.services.deleted'));
+
+        $this->assertDatabaseMissing('services', [
+            'id' => $service->id,
         ]);
     }
 
