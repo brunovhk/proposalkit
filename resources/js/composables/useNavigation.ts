@@ -3,6 +3,7 @@ import {
     BriefcaseBusiness,
     FolderGit2,
     LayoutGrid,
+    UsersRound,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
@@ -23,6 +24,7 @@ export function useNavigation(): UseNavigationReturn {
     const mainNavItems = computed<NavItem[]>(() => {
         const dashboardRoute = dashboard();
         const servicesRoute = '/services';
+        const clientsRoute = '/clients';
 
         return [
             {
@@ -36,6 +38,12 @@ export function useNavigation(): UseNavigationReturn {
                 href: servicesRoute,
                 icon: BriefcaseBusiness,
                 isActive: isCurrentOrParentUrl(servicesRoute),
+            },
+            {
+                title: t('ui.nav.clients'),
+                href: clientsRoute,
+                icon: UsersRound,
+                isActive: isCurrentOrParentUrl(clientsRoute),
             },
         ];
     });

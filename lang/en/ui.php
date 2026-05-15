@@ -88,6 +88,7 @@ return [
     ],
     'nav' => [
         'appearance' => 'Appearance',
+        'clients' => 'Clients',
         'dashboard' => 'Dashboard',
         'documentation' => 'Documentation',
         'navigation_menu' => 'Navigation menu',
@@ -98,6 +99,57 @@ return [
         'security' => 'Security',
         'services' => 'Services',
         'settings' => 'Settings',
+    ],
+    'clients' => [
+        'actions' => [
+            'create' => 'Create client',
+            'delete' => 'Delete client',
+            'save' => 'Save client',
+            'view' => 'View client',
+        ],
+        'confirm_delete' => [
+            'body' => 'This client will be removed from your records.',
+            'title' => 'Delete :name?',
+        ],
+        'created' => 'Client created.',
+        'deleted' => 'Client deleted.',
+        'detail' => [
+            'title' => 'Client details',
+        ],
+        'empty' => 'No clients found.',
+        'fields' => [
+            'address' => 'Address',
+            'email' => 'Email',
+            'name' => 'Name',
+            'tax_id' => 'Tax ID',
+        ],
+        'form' => [
+            'create_description' => 'Add a client record for proposal recipients and billing contacts.',
+            'create_head' => 'Create client',
+            'create_title' => 'Create client',
+            'edit_description' => 'Update contact, tax, and billing details for this client.',
+            'edit_head' => 'Edit client',
+            'edit_title' => 'Edit client',
+        ],
+        'index' => [
+            'description' => 'Manage proposal recipients and billing contacts.',
+            'head' => 'Clients',
+            'title' => 'Client management',
+        ],
+        'placeholders' => [
+            'address' => 'Billing address, VAT details, or delivery notes',
+            'email' => 'finance@example.com',
+            'name' => 'Acme Corporation',
+            'tax_id' => 'VAT number',
+        ],
+        'table' => [
+            'actions' => 'Actions',
+            'address' => 'Address',
+            'email' => 'Email',
+            'name' => 'Client',
+            'tax_id' => 'Tax ID',
+        ],
+        'updated' => 'Client updated.',
     ],
     'services' => [
         'actions' => [
