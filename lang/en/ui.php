@@ -9,6 +9,8 @@ return [
         'continue' => 'Continue',
         'copy' => 'Copy',
         'save' => 'Save',
+        'delete' => 'Delete',
+        'edit' => 'Edit',
     ],
     'auth' => [
         'confirm_password' => [
@@ -92,7 +94,55 @@ return [
         'repository' => 'Repository',
         'search' => 'Search',
         'security' => 'Security',
+        'services' => 'Services',
         'settings' => 'Settings',
+    ],
+    'services' => [
+        'actions' => [
+            'create' => 'Create service',
+            'delete' => 'Delete service',
+            'save' => 'Save service',
+        ],
+        'confirm_delete' => [
+            'body' => 'This service will be removed from your catalog.',
+            'title' => 'Delete :name?',
+        ],
+        'empty' => 'No services found.',
+        'fields' => [
+            'description' => 'Description',
+            'name' => 'Name',
+            'price' => 'Price',
+            'type' => 'Type',
+        ],
+        'form' => [
+            'create_description' => 'Add a reusable service with a price stored in cents.',
+            'create_head' => 'Create service',
+            'create_title' => 'Create service',
+            'edit_description' => 'Update the catalog details and pricing for this service.',
+            'edit_head' => 'Edit service',
+            'edit_title' => 'Edit service',
+        ],
+        'index' => [
+            'description' => 'Manage the reusable services used in commercial proposals.',
+            'head' => 'Services',
+            'title' => 'Service catalog',
+        ],
+        'placeholders' => [
+            'description' => 'Scope notes, deliverables, or billing details',
+            'name' => 'Implementation workshop',
+            'type' => 'Select a pricing type',
+        ],
+        'table' => [
+            'actions' => 'Actions',
+            'description' => 'Description',
+            'name' => 'Service',
+            'price' => 'Price',
+            'type' => 'Type',
+        ],
+        'types' => [
+            'fixed' => 'Fixed',
+            'hourly' => 'Hourly',
+        ],
     ],
     'settings' => [
         'delete_user' => [
