@@ -1,4 +1,10 @@
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-vue-next';
+import {
+    BookOpen,
+    BriefcaseBusiness,
+    FolderGit2,
+    LayoutGrid,
+    UsersRound,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
@@ -13,10 +19,12 @@ type UseNavigationReturn = {
 
 export function useNavigation(): UseNavigationReturn {
     const { t } = useTranslations();
-    const { isCurrentUrl } = useCurrentUrl();
+    const { isCurrentOrParentUrl, isCurrentUrl } = useCurrentUrl();
 
     const mainNavItems = computed<NavItem[]>(() => {
         const dashboardRoute = dashboard();
+        const servicesRoute = '/services';
+        const clientsRoute = '/clients';
 
         return [
             {
@@ -24,6 +32,18 @@ export function useNavigation(): UseNavigationReturn {
                 href: dashboardRoute,
                 icon: LayoutGrid,
                 isActive: isCurrentUrl(dashboardRoute),
+            },
+            {
+                title: t('ui.nav.services'),
+                href: servicesRoute,
+                icon: BriefcaseBusiness,
+                isActive: isCurrentOrParentUrl(servicesRoute),
+            },
+            {
+                title: t('ui.nav.clients'),
+                href: clientsRoute,
+                icon: UsersRound,
+                isActive: isCurrentOrParentUrl(clientsRoute),
             },
         ];
     });

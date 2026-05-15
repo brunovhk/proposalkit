@@ -42,6 +42,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'success' => function () use ($request): ?string {
+                    $message = $request->session()->get('success');
+
+                    return is_string($message) ? $message : null;
+                },
+            ],
             'locale' => app()->getLocale(),
             'translations' => fn (): array => $this->translations(app()->getLocale()),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

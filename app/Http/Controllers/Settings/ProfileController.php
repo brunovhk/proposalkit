@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
@@ -34,12 +36,10 @@ class ProfileController extends Controller
         $user = $request->user();
         assert($user instanceof User);
 
-        $user->fill($request->validated());
+        /** @var array{name: string} $validated */
+        $validated = $request->validated();
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
+        $user->name = $validated['name'];
         $user->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);

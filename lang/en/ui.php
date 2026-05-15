@@ -9,6 +9,9 @@ return [
         'continue' => 'Continue',
         'copy' => 'Copy',
         'save' => 'Save',
+        'delete' => 'Delete',
+        'edit' => 'Edit',
+        'view' => 'View',
     ],
     'auth' => [
         'confirm_password' => [
@@ -81,9 +84,11 @@ return [
     ],
     'messages' => [
         'error_title' => 'Something went wrong.',
+        'success_title' => 'Success',
     ],
     'nav' => [
         'appearance' => 'Appearance',
+        'clients' => 'Clients',
         'dashboard' => 'Dashboard',
         'documentation' => 'Documentation',
         'navigation_menu' => 'Navigation menu',
@@ -92,7 +97,113 @@ return [
         'repository' => 'Repository',
         'search' => 'Search',
         'security' => 'Security',
+        'services' => 'Services',
         'settings' => 'Settings',
+    ],
+    'clients' => [
+        'actions' => [
+            'create' => 'Create client',
+            'delete' => 'Delete client',
+            'save' => 'Save client',
+            'view' => 'View client',
+        ],
+        'confirm_delete' => [
+            'body' => 'This client will be removed from your records.',
+            'title' => 'Delete :name?',
+        ],
+        'created' => 'Client created.',
+        'deleted' => 'Client deleted.',
+        'detail' => [
+            'title' => 'Client details',
+        ],
+        'empty' => 'No clients found.',
+        'fields' => [
+            'address' => 'Address',
+            'email' => 'Email',
+            'name' => 'Name',
+            'tax_id' => 'Tax ID',
+        ],
+        'form' => [
+            'create_description' => 'Add a client record for proposal recipients and billing contacts.',
+            'create_head' => 'Create client',
+            'create_title' => 'Create client',
+            'edit_description' => 'Update contact, tax, and billing details for this client.',
+            'edit_head' => 'Edit client',
+            'edit_title' => 'Edit client',
+        ],
+        'index' => [
+            'description' => 'Manage proposal recipients and billing contacts.',
+            'head' => 'Clients',
+            'title' => 'Client management',
+        ],
+        'placeholders' => [
+            'address' => 'Billing address, VAT details, or delivery notes',
+            'email' => 'finance@example.com',
+            'name' => 'Acme Corporation',
+            'tax_id' => 'VAT number',
+        ],
+        'table' => [
+            'actions' => 'Actions',
+            'address' => 'Address',
+            'email' => 'Email',
+            'name' => 'Client',
+            'tax_id' => 'Tax ID',
+        ],
+        'updated' => 'Client updated.',
+    ],
+    'services' => [
+        'actions' => [
+            'create' => 'Create service',
+            'delete' => 'Delete service',
+            'save' => 'Save service',
+            'view' => 'View service',
+        ],
+        'confirm_delete' => [
+            'body' => 'This service will be removed from your catalog.',
+            'title' => 'Delete :name?',
+        ],
+        'created' => 'Service created.',
+        'deleted' => 'Service deleted.',
+        'detail' => [
+            'title' => 'Service details',
+        ],
+        'empty' => 'No services found.',
+        'fields' => [
+            'description' => 'Description',
+            'name' => 'Name',
+            'price' => 'Price',
+            'type' => 'Type',
+        ],
+        'form' => [
+            'create_description' => 'Add a reusable service with a price stored in cents.',
+            'create_head' => 'Create service',
+            'create_title' => 'Create service',
+            'edit_description' => 'Update the catalog details and pricing for this service.',
+            'edit_head' => 'Edit service',
+            'edit_title' => 'Edit service',
+        ],
+        'index' => [
+            'description' => 'Manage the reusable services used in commercial proposals.',
+            'head' => 'Services',
+            'title' => 'Service catalog',
+        ],
+        'placeholders' => [
+            'description' => 'Scope notes, deliverables, or billing details',
+            'name' => 'Implementation workshop',
+            'type' => 'Select a pricing type',
+        ],
+        'table' => [
+            'actions' => 'Actions',
+            'description' => 'Description',
+            'name' => 'Service',
+            'price' => 'Price',
+            'type' => 'Type',
+        ],
+        'types' => [
+            'fixed' => 'Fixed',
+            'hourly' => 'Hourly',
+        ],
+        'updated' => 'Service updated.',
     ],
     'settings' => [
         'delete_user' => [
@@ -107,7 +218,8 @@ return [
         'description' => 'Manage your profile and account settings',
         'profile' => [
             'breadcrumb' => 'Profile settings',
-            'description' => 'Update your name and email address',
+            'description' => 'Update your profile name',
+            'email_locked' => 'Email cannot be changed. Contact support if needed.',
             'email_unverified' => 'Your email address is unverified.',
             'head' => 'Profile settings',
             'resend_verification' => 'Click here to resend the verification email.',

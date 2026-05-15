@@ -2,7 +2,6 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { login } from '@/routes';
@@ -69,14 +68,17 @@ watchEffect(() => {
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.password') }}
                 </label>
-                <PasswordInput
-                    id="password"
+                <Password
+                    input-id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
                     :placeholder="t('ui.fields.password')"
                     :invalid="Boolean(errors.password)"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -85,14 +87,17 @@ watchEffect(() => {
                 <label for="password_confirmation" class="text-sm font-medium">
                     {{ t('ui.fields.confirm_password') }}
                 </label>
-                <PasswordInput
-                    id="password_confirmation"
+                <Password
+                    input-id="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password_confirmation"
                     :placeholder="t('ui.fields.confirm_password')"
                     :invalid="Boolean(errors.password_confirmation)"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>

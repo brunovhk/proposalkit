@@ -3,7 +3,6 @@ import { Form } from '@inertiajs/vue3';
 import { useClipboard } from '@vueuse/core';
 import { Check, Copy, ScanLine } from 'lucide-vue-next';
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
-import AlertError from '@/components/AlertError.vue';
 import InputError from '@/components/InputError.vue';
 import { useAppearance } from '@/composables/useAppearance';
 import { useTranslations } from '@/composables/useTranslations';
@@ -148,7 +147,27 @@ watch(
             class="relative flex w-auto flex-col items-center justify-center space-y-5"
         >
             <template v-if="!showVerificationStep">
-                <AlertError v-if="errors?.length" :errors="errors" />
+                <Message
+                    v-if="errors?.length"
+                    severity="error"
+                    :closable="false"
+                >
+                    <div class="space-y-2">
+                        <p class="font-medium">
+                            {{ t('ui.messages.error_title') }}
+                        </p>
+                        <ul class="list-inside list-disc text-sm">
+                            <li
+                                v-for="(error, index) in Array.from(
+                                    new Set(errors),
+                                )"
+                                :key="index"
+                            >
+                                {{ error }}
+                            </li>
+                        </ul>
+                    </div>
+                </Message>
                 <template v-else>
                     <div
                         class="relative mx-auto flex max-w-md items-center overflow-hidden"

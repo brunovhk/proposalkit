@@ -2,7 +2,6 @@
 import { Form } from '@inertiajs/vue3';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-vue-next';
 import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
-import AlertError from '@/components/AlertError.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
@@ -88,7 +87,23 @@ onMounted(async () => {
                 ]"
             >
                 <div v-if="errors?.length" class="mt-6">
-                    <AlertError :errors="errors" />
+                    <Message severity="error" :closable="false">
+                        <div class="space-y-2">
+                            <p class="font-medium">
+                                {{ t('ui.messages.error_title') }}
+                            </p>
+                            <ul class="list-inside list-disc text-sm">
+                                <li
+                                    v-for="(error, index) in Array.from(
+                                        new Set(errors),
+                                    )"
+                                    :key="index"
+                                >
+                                    {{ error }}
+                                </li>
+                            </ul>
+                        </div>
+                    </Message>
                 </div>
                 <div v-else class="mt-3 space-y-3">
                     <div

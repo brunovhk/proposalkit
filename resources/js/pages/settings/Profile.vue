@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Form, Head, Link, setLayoutProps, usePage } from '@inertiajs/vue3';
+import { Head, Link, setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import { computed, watchEffect } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
-import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
@@ -19,6 +18,20 @@ defineProps<Props>();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const { t } = useTranslations();
+
+type ProfileForm = {
+    name: string;
+};
+
+const profileForm = useForm<ProfileForm>({
+    name: user.value.name,
+});
+
+const submitProfile = (): void => {
+    profileForm.patch(ProfileController.update.url(), {
+        preserveScroll: true,
+    });
+};
 
 watchEffect(() => {
     setLayoutProps({
@@ -44,26 +57,29 @@ watchEffect(() => {
             :description="t('ui.settings.profile.description')"
         />
 
-        <Form
-            v-bind="ProfileController.update.form()"
-            class="space-y-6"
-            v-slot="{ errors, processing }"
-        >
+        <form class="space-y-6" @submit.prevent="submitProfile">
             <div class="grid gap-2">
                 <label for="name" class="text-sm font-medium">
                     {{ t('ui.fields.name') }}
                 </label>
                 <InputText
                     id="name"
+                    v-model="profileForm.name"
                     class="mt-1 block w-full"
                     name="name"
-                    :default-value="user.name"
                     fluid
                     required
                     autocomplete="name"
                     :placeholder="t('ui.fields.name')"
                 />
-                <InputError class="mt-2" :message="errors.name" />
+                <Message
+                    v-if="profileForm.errors.name"
+                    severity="error"
+                    :closable="false"
+                    class="mt-2"
+                >
+                    {{ profileForm.errors.name }}
+                </Message>
             </div>
 
             <div class="grid gap-2">
@@ -72,16 +88,17 @@ watchEffect(() => {
                 </label>
                 <InputText
                     id="email"
+                    :model-value="user.email"
                     type="email"
                     class="mt-1 block w-full"
-                    name="email"
-                    :default-value="user.email"
                     fluid
-                    required
+                    disabled
                     autocomplete="username"
                     :placeholder="t('ui.fields.email_address')"
                 />
-                <InputError class="mt-2" :message="errors.email" />
+                <p class="text-sm text-surface-500 dark:text-surface-400">
+                    {{ t('ui.settings.profile.email_locked') }}
+                </p>
             </div>
 
             <div v-if="mustVerifyEmail && !user.email_verified_at">
@@ -106,13 +123,15 @@ watchEffect(() => {
 
             <div class="flex items-center gap-4">
                 <Button
-                    :disabled="processing"
+                    type="submit"
+                    :disabled="profileForm.processing"
+                    :loading="profileForm.processing"
                     data-test="update-profile-button"
                 >
                     {{ t('ui.actions.save') }}
                 </Button>
             </div>
-        </Form>
+        </form>
     </div>
 
     <DeleteUser />
