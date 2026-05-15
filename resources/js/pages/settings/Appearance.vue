@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
+import { Monitor, Moon, Sun } from 'lucide-vue-next';
+import type { LucideIcon } from 'lucide-vue-next';
 import { computed, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useAppearance } from '@/composables/useAppearance';
@@ -10,18 +12,27 @@ import type { Appearance } from '@/types';
 const { t } = useTranslations();
 const { appearance, updateAppearance } = useAppearance();
 
-const appearanceOptions = computed(() => [
+type AppearanceOption = {
+    label: string;
+    value: Appearance;
+    icon?: LucideIcon;
+};
+
+const appearanceOptions = computed<AppearanceOption[]>(() => [
     {
         label: t('ui.settings.appearance.light'),
         value: 'light',
+        icon: Sun,
     },
     {
         label: t('ui.settings.appearance.dark'),
         value: 'dark',
+        icon: Moon,
     },
     {
         label: t('ui.settings.appearance.system'),
         value: 'system',
+        icon: Monitor,
     },
 ]);
 
@@ -56,6 +67,17 @@ watchEffect(() => {
             @update:model-value="
                 (value) => updateAppearance(value as Appearance)
             "
-        />
+        >
+            <template #option="{ option }">
+                <span class="flex items-center gap-2">
+                    <component
+                        :is="option.icon"
+                        class="h-4 w-4"
+                        aria-hidden="true"
+                    />
+                    <span>{{ option.label }}</span>
+                </span>
+            </template>
+        </SelectButton>
     </div>
 </template>

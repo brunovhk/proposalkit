@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps, useForm } from '@inertiajs/vue3';
 import { ShieldCheck } from 'lucide-vue-next';
 import { onUnmounted, ref, watchEffect } from 'vue';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
-import InputError from '@/components/InputError.vue';
 import TwoFactorRecoveryCodes from '@/components/TwoFactorRecoveryCodes.vue';
 import TwoFactorSetupModal from '@/components/TwoFactorSetupModal.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -27,6 +26,31 @@ withDefaults(defineProps<Props>(), {
 const { hasSetupData, clearTwoFactorAuthData } = useTwoFactorAuth();
 const { t } = useTranslations();
 const showSetupModal = ref<boolean>(false);
+
+type PasswordForm = {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+};
+
+const passwordForm = useForm<PasswordForm>({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const updatePassword = (): void => {
+    passwordForm.put(SecurityController.update.url(), {
+        preserveScroll: true,
+        onSuccess: () => passwordForm.reset(),
+        onError: () =>
+            passwordForm.reset(
+                'current_password',
+                'password',
+                'password_confirmation',
+            ),
+    });
+};
 
 watchEffect(() => {
     setLayoutProps({
@@ -54,26 +78,14 @@ onUnmounted(() => clearTwoFactorAuthData());
             :description="t('ui.settings.security.password_description')"
         />
 
-        <Form
-            v-bind="SecurityController.update.form()"
-            :options="{
-                preserveScroll: true,
-            }"
-            reset-on-success
-            :reset-on-error="[
-                'password',
-                'password_confirmation',
-                'current_password',
-            ]"
-            class="space-y-6"
-            v-slot="{ errors, processing }"
-        >
+        <form class="space-y-6" @submit.prevent="updatePassword">
             <div class="grid gap-2">
                 <label for="current_password" class="text-sm font-medium">
                     {{ t('ui.fields.current_password') }}
                 </label>
                 <Password
                     input-id="current_password"
+                    v-model="passwordForm.current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
@@ -82,7 +94,13 @@ onUnmounted(() => clearTwoFactorAuthData());
                     toggle-mask
                     fluid
                 />
-                <InputError :message="errors.current_password" />
+                <Message
+                    v-if="passwordForm.errors.current_password"
+                    severity="error"
+                    :closable="false"
+                >
+                    {{ passwordForm.errors.current_password }}
+                </Message>
             </div>
 
             <div class="grid gap-2">
@@ -91,6 +109,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                 </label>
                 <Password
                     input-id="password"
+                    v-model="passwordForm.password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
@@ -99,7 +118,13 @@ onUnmounted(() => clearTwoFactorAuthData());
                     toggle-mask
                     fluid
                 />
-                <InputError :message="errors.password" />
+                <Message
+                    v-if="passwordForm.errors.password"
+                    severity="error"
+                    :closable="false"
+                >
+                    {{ passwordForm.errors.password }}
+                </Message>
             </div>
 
             <div class="grid gap-2">
@@ -108,6 +133,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                 </label>
                 <Password
                     input-id="password_confirmation"
+                    v-model="passwordForm.password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
@@ -116,18 +142,26 @@ onUnmounted(() => clearTwoFactorAuthData());
                     toggle-mask
                     fluid
                 />
-                <InputError :message="errors.password_confirmation" />
+                <Message
+                    v-if="passwordForm.errors.password_confirmation"
+                    severity="error"
+                    :closable="false"
+                >
+                    {{ passwordForm.errors.password_confirmation }}
+                </Message>
             </div>
 
             <div class="flex items-center gap-4">
                 <Button
-                    :disabled="processing"
+                    type="submit"
+                    :disabled="passwordForm.processing"
+                    :loading="passwordForm.processing"
                     data-test="update-password-button"
                 >
                     {{ t('ui.settings.security.save_password') }}
                 </Button>
             </div>
-        </Form>
+        </form>
     </div>
 
     <div v-if="canManageTwoFactor" class="space-y-6">

@@ -218,7 +218,8 @@ return [
         'description' => 'Manage your profile and account settings',
         'profile' => [
             'breadcrumb' => 'Profile settings',
-            'description' => 'Update your name and email address',
+            'description' => 'Update your profile name',
+            'email_locked' => 'Email cannot be changed. Contact support if needed.',
             'email_unverified' => 'Your email address is unverified.',
             'head' => 'Profile settings',
             'resend_verification' => 'Click here to resend the verification email.',
