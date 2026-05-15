@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -35,5 +38,19 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+
+        $user = auth()->user();
+
+        assert($user instanceof User);
+
+        $this->assertDatabaseHas('tenants', [
+            'id' => $user->tenant_id,
+            'name' => "Test User's Company",
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'tenant_id' => $user->tenant_id,
+        ]);
     }
 }
