@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { ref, useTemplateRef } from 'vue';
+import { nextTick, ref } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
-const passwordInput = useTemplateRef('passwordInput');
 const visible = ref(false);
 const { t } = useTranslations();
+
+async function focusPasswordInput(): Promise<void> {
+    await nextTick();
+    document.getElementById('delete-user-password')?.focus();
+}
 </script>
 
 <template>
@@ -47,7 +50,7 @@ const { t } = useTranslations();
                 <Form
                     v-bind="ProfileController.destroy.form()"
                     reset-on-success
-                    @error="() => passwordInput?.focus()"
+                    @error="focusPasswordInput"
                     @success="visible = false"
                     :options="{
                         preserveScroll: true,
@@ -60,14 +63,16 @@ const { t } = useTranslations();
                     </p>
 
                     <div class="grid gap-2">
-                        <label for="password" class="sr-only">
+                        <label for="delete-user-password" class="sr-only">
                             {{ t('ui.fields.password') }}
                         </label>
-                        <PasswordInput
-                            id="password"
+                        <Password
+                            input-id="delete-user-password"
                             name="password"
-                            ref="passwordInput"
                             :placeholder="t('ui.fields.password')"
+                            :feedback="false"
+                            toggle-mask
+                            fluid
                         />
                         <InputError :message="errors.password" />
                     </div>

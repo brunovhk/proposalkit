@@ -2,7 +2,6 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { register } from '@/routes';
@@ -75,14 +74,17 @@ watchEffect(() => {
                         {{ t('ui.auth.login.forgot_password') }}
                     </TextLink>
                 </div>
-                <PasswordInput
-                    id="password"
+                <Password
+                    input-id="password"
                     name="password"
                     required
                     :tabindex="2"
                     autocomplete="current-password"
                     :placeholder="t('ui.fields.password')"
                     :invalid="Boolean(errors.password)"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.password" />
             </div>

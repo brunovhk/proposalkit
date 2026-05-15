@@ -5,7 +5,6 @@ import { onUnmounted, ref, watchEffect } from 'vue';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import TwoFactorRecoveryCodes from '@/components/TwoFactorRecoveryCodes.vue';
 import TwoFactorSetupModal from '@/components/TwoFactorSetupModal.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -73,12 +72,15 @@ onUnmounted(() => clearTwoFactorAuthData());
                 <label for="current_password" class="text-sm font-medium">
                     {{ t('ui.fields.current_password') }}
                 </label>
-                <PasswordInput
-                    id="current_password"
+                <Password
+                    input-id="current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
                     :placeholder="t('ui.fields.current_password')"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.current_password" />
             </div>
@@ -87,12 +89,15 @@ onUnmounted(() => clearTwoFactorAuthData());
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.new_password') }}
                 </label>
-                <PasswordInput
-                    id="password"
+                <Password
+                    input-id="password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                     :placeholder="t('ui.fields.new_password')"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -101,12 +106,15 @@ onUnmounted(() => clearTwoFactorAuthData());
                 <label for="password_confirmation" class="text-sm font-medium">
                     {{ t('ui.fields.confirm_password') }}
                 </label>
-                <PasswordInput
-                    id="password_confirmation"
+                <Password
+                    input-id="password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                     :placeholder="t('ui.fields.confirm_password')"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>

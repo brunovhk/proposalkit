@@ -2,7 +2,6 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import { useTranslations } from '@/composables/useTranslations';
 import { store } from '@/routes/password/confirm';
 
@@ -29,13 +28,16 @@ watchEffect(() => {
                 <label for="password" class="text-sm font-medium">
                     {{ t('ui.fields.password') }}
                 </label>
-                <PasswordInput
-                    id="password"
+                <Password
+                    input-id="password"
                     name="password"
                     required
                     autocomplete="current-password"
                     autofocus
                     :invalid="Boolean(errors.password)"
+                    :feedback="false"
+                    toggle-mask
+                    fluid
                 />
 
                 <InputError :message="errors.password" />
