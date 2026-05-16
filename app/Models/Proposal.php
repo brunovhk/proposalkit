@@ -7,10 +7,12 @@ namespace App\Models;
 use App\Enums\ProposalStatus;
 use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\ProposalFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -22,9 +24,9 @@ use Illuminate\Support\Str;
  * @property string $uuid
  * @property string $title
  * @property ProposalStatus $status
- * @property \Illuminate\Support\Carbon|null $valid_until
+ * @property Carbon|null $valid_until
  * @property-read Client $client
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ProposalItem> $items
+ * @property-read Collection<int, ProposalItem> $items
  */
 class Proposal extends Model
 {

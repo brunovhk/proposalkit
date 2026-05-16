@@ -94,6 +94,7 @@ return [
         'navigation_menu' => 'Navigation menu',
         'platform' => 'Platform',
         'profile' => 'Profile',
+        'proposals' => 'Proposals',
         'repository' => 'Repository',
         'search' => 'Search',
         'security' => 'Security',
@@ -204,6 +205,57 @@ return [
             'hourly' => 'Hourly',
         ],
         'updated' => 'Service updated.',
+    ],
+    'proposals' => [
+        'actions' => [
+            'create' => 'Create proposal',
+            'delete' => 'Delete proposal',
+            'save' => 'Save proposal',
+        ],
+        'confirm_delete' => [
+            'body' => 'This proposal and its item snapshots will be removed.',
+            'title' => 'Delete :title?',
+        ],
+        'created' => 'Proposal created.',
+        'deleted' => 'Proposal deleted.',
+        'empty' => 'No proposals found.',
+        'fields' => [
+            'client' => 'Client',
+            'title' => 'Title',
+            'valid_until' => 'Valid until',
+        ],
+        'form' => [
+            'create_description' => 'Create proposal metadata before adding item snapshots.',
+            'create_head' => 'Create proposal',
+            'create_title' => 'Create proposal',
+            'edit_description' => 'Update proposal metadata and client assignment.',
+            'edit_head' => 'Edit proposal',
+            'edit_title' => 'Edit proposal',
+        ],
+        'index' => [
+            'description' => 'Track proposal drafts, sent offers, and client decisions.',
+            'head' => 'Proposals',
+            'title' => 'Proposals',
+        ],
+        'placeholders' => [
+            'client' => 'Select a client',
+            'title' => 'Website redesign proposal',
+        ],
+        'statuses' => [
+            'accepted' => 'Accepted',
+            'declined' => 'Declined',
+            'draft' => 'Draft',
+            'sent' => 'Sent',
+        ],
+        'table' => [
+            'actions' => 'Actions',
+            'client' => 'Client',
+            'status' => 'Status',
+            'title' => 'Title',
+            'total' => 'Total value',
+            'valid_until' => 'Valid until',
+        ],
+        'updated' => 'Proposal updated.',
     ],
     'settings' => [
         'delete_user' => [
