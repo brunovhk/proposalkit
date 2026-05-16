@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil, Plus, Send, Trash2 } from 'lucide-vue-next';
+import { ExternalLink, Pencil, Plus, Send, Trash2 } from 'lucide-vue-next';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -90,6 +90,10 @@ function sendProposal(proposal: ProposalRecord): void {
     router.post(proposal.urls.send, undefined, {
         preserveScroll: true,
     });
+}
+
+function publicProposalUrl(proposal: ProposalRecord): string {
+    return `/p/${proposal.uuid}`;
 }
 
 function destroyProposal(): void {
@@ -203,7 +207,10 @@ function destroyProposal(): void {
                             >
                                 <Send class="size-4" />
                             </Button>
-                            <Link :href="data.urls.edit">
+                            <Link
+                                v-if="data.status.value === 'draft'"
+                                :href="data.urls.edit"
+                            >
                                 <Button
                                     severity="secondary"
                                     variant="text"
@@ -213,6 +220,7 @@ function destroyProposal(): void {
                                 </Button>
                             </Link>
                             <Button
+                                v-if="data.status.value === 'draft'"
                                 severity="danger"
                                 variant="text"
                                 :aria-label="t('ui.proposals.actions.delete')"
@@ -220,6 +228,22 @@ function destroyProposal(): void {
                             >
                                 <Trash2 class="size-4" />
                             </Button>
+                            <a
+                                v-if="data.status.value !== 'draft'"
+                                :href="publicProposalUrl(data)"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button
+                                    severity="secondary"
+                                    variant="text"
+                                    :aria-label="
+                                        t('ui.proposals.actions.view_public')
+                                    "
+                                >
+                                    <ExternalLink class="size-4" />
+                                </Button>
+                            </a>
                         </div>
                     </template>
                 </Column>

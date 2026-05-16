@@ -212,6 +212,7 @@ return [
             'delete' => 'Delete proposal',
             'save' => 'Save proposal',
             'send' => 'Send proposal',
+            'view_public' => 'View public proposal',
         ],
         'confirm_delete' => [
             'body' => 'This proposal and its item snapshots will be removed.',

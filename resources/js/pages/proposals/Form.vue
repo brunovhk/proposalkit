@@ -7,6 +7,7 @@ import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 type ServiceTypeValue = 'hourly' | 'fixed';
+type ProposalStatusValue = 'draft' | 'sent' | 'accepted' | 'declined';
 
 type ClientOption = {
     id: number;
@@ -44,6 +45,10 @@ type ProposalRecord = {
     id: number;
     title: string;
     client_id: number;
+    status: {
+        value: ProposalStatusValue;
+        label: string;
+    };
     valid_until: {
         value: string | null;
         formatted: string | null;
@@ -86,6 +91,9 @@ const selectedServiceId = ref<number | null>(null);
 
 const proposal = computed(() => props.proposal?.data ?? null);
 const isEditing = computed(() => proposal.value !== null);
+const isLocked = computed(
+    () => isEditing.value && proposal.value?.status.value !== 'draft',
+);
 
 const form = useForm<ProposalForm>({
     title: proposal.value?.title ?? '',
@@ -225,6 +233,10 @@ function removeItem(index: number): void {
 }
 
 function submit(): void {
+    if (isLocked.value) {
+        return;
+    }
+
     form.transform((data) => ({
         ...data,
         items: data.items.map((item) => ({
@@ -285,6 +297,7 @@ function submit(): void {
                             v-model="form.title"
                             :invalid="Boolean(form.errors.title)"
                             :placeholder="t('ui.proposals.placeholders.title')"
+                            :disabled="isLocked"
                             fluid
                             required
                             autocomplete="off"
@@ -307,6 +320,7 @@ function submit(): void {
                                 :placeholder="
                                     t('ui.proposals.placeholders.client')
                                 "
+                                :disabled="isLocked"
                                 filter
                                 fluid
                             />
@@ -325,6 +339,7 @@ function submit(): void {
                                 v-model="validUntilDate"
                                 date-format="yy-mm-dd"
                                 :invalid="Boolean(form.errors.valid_until)"
+                                :disabled="isLocked"
                                 show-icon
                                 show-button-bar
                                 fluid
@@ -381,6 +396,7 @@ function submit(): void {
                             :placeholder="
                                 t('ui.proposals.placeholders.catalog_service')
                             "
+                            :disabled="isLocked"
                             filter
                             fluid
                         >
@@ -448,6 +464,7 @@ function submit(): void {
                                 :id="`items_${index}_name`"
                                 v-model="item.name"
                                 :invalid="Boolean(itemError(index, 'name'))"
+                                :disabled="isLocked"
                                 fluid
                             />
                             <InputError :message="itemError(index, 'name')" />
@@ -486,6 +503,7 @@ function submit(): void {
                                 :min="0"
                                 :min-fraction-digits="2"
                                 :max-fraction-digits="2"
+                                :disabled="isLocked"
                                 fluid
                             />
                             <InputError :message="itemError(index, 'price')" />
@@ -503,6 +521,7 @@ function submit(): void {
                                 v-model="item.quantity"
                                 :invalid="Boolean(itemError(index, 'quantity'))"
                                 :min="1"
+                                :disabled="isLocked"
                                 show-buttons
                                 fluid
                             />
@@ -530,6 +549,7 @@ function submit(): void {
                                 severity="danger"
                                 variant="text"
                                 :aria-label="t('ui.proposals.items.remove')"
+                                :disabled="isLocked"
                                 @click="removeItem(index)"
                             >
                                 <Trash2 class="size-4" />
@@ -557,7 +577,10 @@ function submit(): void {
                             {{ t('ui.actions.cancel') }}
                         </Button>
                     </Link>
-                    <Button type="submit" :disabled="form.processing">
+                    <Button
+                        type="submit"
+                        :disabled="form.processing || isLocked"
+                    >
                         <Save class="size-4" />
                         <span>{{ t('ui.proposals.actions.save') }}</span>
                     </Button>

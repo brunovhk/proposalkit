@@ -199,6 +199,49 @@ class ProposalControllerTest extends TestCase
         ]);
     }
 
+    public function test_non_draft_proposals_cannot_be_edited_updated_or_deleted(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $client = Client::factory()->for($tenant)->create();
+
+        foreach ([ProposalStatus::Sent, ProposalStatus::Accepted, ProposalStatus::Declined] as $status) {
+            $proposal = Proposal::factory()
+                ->for($tenant)
+                ->for($client)
+                ->create([
+                    'status' => $status,
+                    'title' => "Locked {$status->value} proposal",
+                ]);
+
+            $this
+                ->actingAs($user)
+                ->get("/proposals/{$proposal->id}/edit")
+                ->assertForbidden();
+
+            $this
+                ->actingAs($user)
+                ->put("/proposals/{$proposal->id}", [
+                    'title' => 'Mutated proposal',
+                    'client_id' => $client->id,
+                    'valid_until' => null,
+                    'items' => [],
+                ])
+                ->assertForbidden();
+
+            $this
+                ->actingAs($user)
+                ->delete("/proposals/{$proposal->id}")
+                ->assertForbidden();
+
+            $this->assertDatabaseHas('proposals', [
+                'id' => $proposal->id,
+                'status' => $status->value,
+                'title' => "Locked {$status->value} proposal",
+            ]);
+        }
+    }
+
     public function test_creation_validation_rejects_invalid_payloads(): void
     {
         $tenant = Tenant::factory()->create();

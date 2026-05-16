@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\ProposalStatus;
 use App\Models\Proposal;
 use App\Models\User;
 
@@ -41,7 +42,8 @@ class ProposalPolicy
      */
     public function update(User $user, Proposal $proposal): bool
     {
-        return $this->belongsToUsersTenant($user, $proposal);
+        return $this->belongsToUsersTenant($user, $proposal)
+            && $this->isDraft($proposal);
     }
 
     /**
@@ -49,7 +51,8 @@ class ProposalPolicy
      */
     public function send(User $user, Proposal $proposal): bool
     {
-        return $this->belongsToUsersTenant($user, $proposal);
+        return $this->belongsToUsersTenant($user, $proposal)
+            && $this->isDraft($proposal);
     }
 
     /**
@@ -57,7 +60,8 @@ class ProposalPolicy
      */
     public function delete(User $user, Proposal $proposal): bool
     {
-        return $this->belongsToUsersTenant($user, $proposal);
+        return $this->belongsToUsersTenant($user, $proposal)
+            && $this->isDraft($proposal);
     }
 
     /**
@@ -66,5 +70,13 @@ class ProposalPolicy
     private function belongsToUsersTenant(User $user, Proposal $proposal): bool
     {
         return $proposal->tenant_id === $user->tenant_id;
+    }
+
+    /**
+     * Determine whether the proposal can still be changed by the tenant.
+     */
+    private function isDraft(Proposal $proposal): bool
+    {
+        return $proposal->status === ProposalStatus::Draft;
     }
 }
