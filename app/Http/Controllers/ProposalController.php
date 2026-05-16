@@ -10,11 +10,13 @@ use App\Actions\Proposals\TransitionProposalAction;
 use App\Actions\Proposals\UpdateProposal;
 use App\Enums\ProposalStatus;
 use App\Http\Requests\Proposals\DeleteProposalRequest;
+use App\Http\Requests\Proposals\SendProposalRequest;
 use App\Http\Requests\Proposals\StoreProposalRequest;
 use App\Http\Requests\Proposals\UpdateProposalRequest;
 use App\Http\Resources\ClientResource;
 use App\Http\Resources\ProposalResource;
 use App\Http\Resources\ServiceResource;
+use App\Jobs\GenerateProposalPdfJob;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\Service;
@@ -118,12 +120,15 @@ class ProposalController extends Controller
      * Mark a draft proposal as sent.
      */
     public function markAsSent(
+        SendProposalRequest $request,
         Proposal $proposal,
         TransitionProposalAction $transitionProposal,
     ): RedirectResponse {
-        Gate::authorize('send', $proposal);
+        $request->validated();
 
-        $transitionProposal->execute($proposal, ProposalStatus::Sent);
+        $sentProposal = $transitionProposal->execute($proposal, ProposalStatus::Sent);
+
+        GenerateProposalPdfJob::dispatch($sentProposal->id);
 
         return to_route('proposals.index')
             ->with('success', __('ui.proposals.sent'));

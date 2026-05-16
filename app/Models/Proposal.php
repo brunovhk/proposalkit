@@ -25,6 +25,7 @@ use Illuminate\Support\Str;
  * @property string $title
  * @property ProposalStatus $status
  * @property Carbon|null $valid_until
+ * @property string|null $pdf_path
  * @property-read Client $client
  * @property-read Collection<int, ProposalItem> $items
  */
@@ -47,6 +48,7 @@ class Proposal extends Model
         'title',
         'status',
         'valid_until',
+        'pdf_path',
     ];
 
     /**

@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -156,6 +157,8 @@ class ProposalControllerTest extends TestCase
 
     public function test_authenticated_user_can_mark_own_draft_proposal_as_sent(): void
     {
+        Queue::fake();
+
         $tenant = Tenant::factory()->create();
         $user = User::factory()->for($tenant)->create();
         $proposal = Proposal::factory()
