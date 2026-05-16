@@ -1,6 +1,7 @@
 import {
     BookOpen,
     BriefcaseBusiness,
+    FileText,
     FolderGit2,
     LayoutGrid,
     UsersRound,
@@ -23,6 +24,7 @@ export function useNavigation(): UseNavigationReturn {
 
     const mainNavItems = computed<NavItem[]>(() => {
         const dashboardRoute = dashboard();
+        const proposalsRoute = '/proposals';
         const servicesRoute = '/services';
         const clientsRoute = '/clients';
 
@@ -32,6 +34,12 @@ export function useNavigation(): UseNavigationReturn {
                 href: dashboardRoute,
                 icon: LayoutGrid,
                 isActive: isCurrentUrl(dashboardRoute),
+            },
+            {
+                title: t('ui.nav.proposals'),
+                href: proposalsRoute,
+                icon: FileText,
+                isActive: isCurrentOrParentUrl(proposalsRoute),
             },
             {
                 title: t('ui.nav.services'),
