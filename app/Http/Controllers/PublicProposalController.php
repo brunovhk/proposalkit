@@ -29,6 +29,10 @@ class PublicProposalController extends Controller
             ->where('uuid', $uuid)
             ->firstOrFail();
 
+        if ($proposal->status === ProposalStatus::Draft) {
+            abort(404);
+        }
+
         return Inertia::render('proposals/PublicView', [
             'proposal' => ProposalResource::make($proposal),
             'transitionUrl' => route('public.proposals.transition', $proposal->uuid),

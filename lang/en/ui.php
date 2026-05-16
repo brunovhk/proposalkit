@@ -211,6 +211,7 @@ return [
             'create' => 'Create proposal',
             'delete' => 'Delete proposal',
             'save' => 'Save proposal',
+            'send' => 'Send proposal',
         ],
         'confirm_delete' => [
             'body' => 'This proposal and its item snapshots will be removed.',
@@ -273,6 +274,7 @@ return [
             'draft' => 'Draft',
             'sent' => 'Sent',
         ],
+        'sent' => 'Proposal sent.',
         'table' => [
             'actions' => 'Actions',
             'client' => 'Client',

@@ -45,6 +45,14 @@ class ProposalPolicy
     }
 
     /**
+     * Determine whether the user can send the proposal to the client.
+     */
+    public function send(User $user, Proposal $proposal): bool
+    {
+        return $this->belongsToUsersTenant($user, $proposal);
+    }
+
+    /**
      * Determine whether the user can delete the proposal.
      */
     public function delete(User $user, Proposal $proposal): bool

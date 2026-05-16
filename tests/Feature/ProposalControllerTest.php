@@ -154,6 +154,51 @@ class ProposalControllerTest extends TestCase
                 ->where('services.data.0.id', $service->id));
     }
 
+    public function test_authenticated_user_can_mark_own_draft_proposal_as_sent(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $proposal = Proposal::factory()
+            ->for($tenant)
+            ->create([
+                'status' => ProposalStatus::Draft,
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->post(route('proposals.send', $proposal))
+            ->assertRedirect('/proposals')
+            ->assertSessionHas('success', __('ui.proposals.sent'));
+
+        $this->assertDatabaseHas('proposals', [
+            'id' => $proposal->id,
+            'status' => ProposalStatus::Sent->value,
+        ]);
+    }
+
+    public function test_authenticated_user_cannot_send_another_tenants_proposal(): void
+    {
+        $tenantA = Tenant::factory()->create();
+        $tenantB = Tenant::factory()->create();
+
+        $userA = User::factory()->for($tenantA)->create();
+        $proposalB = Proposal::factory()
+            ->for($tenantB)
+            ->create([
+                'status' => ProposalStatus::Draft,
+            ]);
+
+        $this
+            ->actingAs($userA)
+            ->post(route('proposals.send', $proposalB))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('proposals', [
+            'id' => $proposalB->id,
+            'status' => ProposalStatus::Draft->value,
+        ]);
+    }
+
     public function test_creation_validation_rejects_invalid_payloads(): void
     {
         $tenant = Tenant::factory()->create();

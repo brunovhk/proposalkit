@@ -18,6 +18,8 @@ Route::post('p/{uuid}/transition', [PublicProposalController::class, 'transition
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::post('proposals/{proposal}/send', [ProposalController::class, 'markAsSent'])
+        ->name('proposals.send');
     Route::resource('proposals', ProposalController::class)->except('show');
     Route::resource('services', ServiceController::class)->except('show');
     Route::resource('clients', ClientController::class)->except('show');

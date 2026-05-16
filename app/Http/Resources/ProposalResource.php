@@ -55,6 +55,7 @@ class ProposalResource extends JsonResource
             'urls' => [
                 'edit' => route('proposals.edit', $proposal),
                 'destroy' => route('proposals.destroy', $proposal),
+                'send' => route('proposals.send', $proposal),
             ],
         ];
     }

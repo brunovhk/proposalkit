@@ -6,7 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Actions\Proposals\CreateProposal;
 use App\Actions\Proposals\DeleteProposal;
+use App\Actions\Proposals\TransitionProposalAction;
 use App\Actions\Proposals\UpdateProposal;
+use App\Enums\ProposalStatus;
 use App\Http\Requests\Proposals\DeleteProposalRequest;
 use App\Http\Requests\Proposals\StoreProposalRequest;
 use App\Http\Requests\Proposals\UpdateProposalRequest;
@@ -110,6 +112,21 @@ class ProposalController extends Controller
 
         return to_route('proposals.index')
             ->with('success', __('ui.proposals.updated'));
+    }
+
+    /**
+     * Mark a draft proposal as sent.
+     */
+    public function markAsSent(
+        Proposal $proposal,
+        TransitionProposalAction $transitionProposal,
+    ): RedirectResponse {
+        Gate::authorize('send', $proposal);
+
+        $transitionProposal->execute($proposal, ProposalStatus::Sent);
+
+        return to_route('proposals.index')
+            ->with('success', __('ui.proposals.sent'));
     }
 
     /**

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { Pencil, Plus, Send, Trash2 } from 'lucide-vue-next';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -37,6 +37,7 @@ type ProposalRecord = {
     urls: {
         edit: string;
         destroy: string;
+        send: string;
     };
 };
 
@@ -83,6 +84,12 @@ watchEffect(() => {
 
 function requestDelete(proposal: ProposalRecord): void {
     proposalPendingDelete.value = proposal;
+}
+
+function sendProposal(proposal: ProposalRecord): void {
+    router.post(proposal.urls.send, undefined, {
+        preserveScroll: true,
+    });
 }
 
 function destroyProposal(): void {
@@ -187,6 +194,15 @@ function destroyProposal(): void {
                 <Column :header="t('ui.proposals.table.actions')">
                     <template #body="{ data }: { data: ProposalRecord }">
                         <div class="flex items-center justify-end gap-2">
+                            <Button
+                                v-if="data.status.value === 'draft'"
+                                severity="success"
+                                variant="text"
+                                :aria-label="t('ui.proposals.actions.send')"
+                                @click="sendProposal(data)"
+                            >
+                                <Send class="size-4" />
+                            </Button>
                             <Link :href="data.urls.edit">
                                 <Button
                                     severity="secondary"

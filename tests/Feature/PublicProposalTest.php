@@ -53,6 +53,18 @@ class PublicProposalTest extends TestCase
                 ->where('proposal.data.total.cents', 50_000));
     }
 
+    public function test_draft_proposal_uuid_returns_not_found_for_public_visitors(): void
+    {
+        $proposal = Proposal::factory()
+            ->create([
+                'status' => ProposalStatus::Draft,
+            ]);
+
+        $this
+            ->get(route('public.proposals.show', $proposal->uuid))
+            ->assertNotFound();
+    }
+
     public function test_sent_proposal_can_be_accepted_publicly(): void
     {
         $proposal = Proposal::factory()
