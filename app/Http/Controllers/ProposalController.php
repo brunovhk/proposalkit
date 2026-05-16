@@ -12,8 +12,10 @@ use App\Http\Requests\Proposals\StoreProposalRequest;
 use App\Http\Requests\Proposals\UpdateProposalRequest;
 use App\Http\Resources\ClientResource;
 use App\Http\Resources\ProposalResource;
+use App\Http\Resources\ServiceResource;
 use App\Models\Client;
 use App\Models\Proposal;
+use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -55,6 +57,11 @@ class ProposalController extends Controller
                     ->orderBy('name')
                     ->get(),
             ),
+            'services' => ServiceResource::collection(
+                Service::query()
+                    ->orderBy('name')
+                    ->get(),
+            ),
         ]);
     }
 
@@ -80,6 +87,11 @@ class ProposalController extends Controller
             'proposal' => ProposalResource::make($proposal->load(['client', 'items'])),
             'clients' => ClientResource::collection(
                 Client::query()
+                    ->orderBy('name')
+                    ->get(),
+            ),
+            'services' => ServiceResource::collection(
+                Service::query()
                     ->orderBy('name')
                     ->get(),
             ),

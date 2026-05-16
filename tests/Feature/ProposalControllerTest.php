@@ -9,6 +9,7 @@ use App\Enums\ServiceType;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
+use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,6 +105,53 @@ class ProposalControllerTest extends TestCase
             'type' => ServiceType::Hourly->value,
             'quantity' => 2,
         ]);
+    }
+
+    public function test_create_and_edit_forms_receive_catalog_and_item_data(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $client = Client::factory()->for($tenant)->create();
+        $service = Service::factory()->for($tenant)->create([
+            'name' => 'Proposal Strategy',
+        ]);
+        $proposal = Proposal::factory()
+            ->for($tenant)
+            ->for($client)
+            ->create([
+                'title' => 'Editable Proposal',
+            ]);
+        ProposalItem::factory()
+            ->for($proposal)
+            ->create([
+                'name' => 'Snapshot Item',
+                'price' => 12_500,
+                'type' => ServiceType::Fixed,
+                'quantity' => 2,
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->get('/proposals/create')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('proposals/Form')
+                ->where('proposal', null)
+                ->has('clients.data', 1)
+                ->where('services.data.0.id', $service->id)
+                ->where('services.data.0.name', 'Proposal Strategy'));
+
+        $this
+            ->actingAs($user)
+            ->get("/proposals/{$proposal->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('proposals/Form')
+                ->where('proposal.data.id', $proposal->id)
+                ->where('proposal.data.items.0.name', 'Snapshot Item')
+                ->where('proposal.data.items.0.price.cents', 12_500)
+                ->where('proposal.data.items.0.quantity', 2)
+                ->where('services.data.0.id', $service->id));
     }
 
     public function test_creation_validation_rejects_invalid_payloads(): void

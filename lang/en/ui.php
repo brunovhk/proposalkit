@@ -220,6 +220,7 @@ return [
         'deleted' => 'Proposal deleted.',
         'empty' => 'No proposals found.',
         'fields' => [
+            'catalog_service' => 'Catalog service',
             'client' => 'Client',
             'title' => 'Title',
             'valid_until' => 'Valid until',
@@ -237,7 +238,22 @@ return [
             'head' => 'Proposals',
             'title' => 'Proposals',
         ],
+        'items' => [
+            'columns' => [
+                'actions' => 'Actions',
+                'name' => 'Item',
+                'price' => 'Unit price',
+                'quantity' => 'Quantity',
+                'subtotal' => 'Subtotal',
+                'type' => 'Type',
+            ],
+            'description' => 'Add catalog services as immutable snapshots, then adjust price or quantity for this proposal.',
+            'empty' => 'Select services from the catalog to build this proposal.',
+            'remove' => 'Remove item',
+            'title' => 'Proposal items',
+        ],
         'placeholders' => [
+            'catalog_service' => 'Add service from catalog',
             'client' => 'Select a client',
             'title' => 'Website redesign proposal',
         ],
@@ -254,6 +270,10 @@ return [
             'title' => 'Title',
             'total' => 'Total value',
             'valid_until' => 'Valid until',
+        ],
+        'total' => [
+            'description' => 'Calculated from proposal item snapshots.',
+            'title' => 'Total value',
         ],
         'updated' => 'Proposal updated.',
     ],
