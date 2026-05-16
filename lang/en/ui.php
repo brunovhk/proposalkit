@@ -257,6 +257,16 @@ return [
             'client' => 'Select a client',
             'title' => 'Website redesign proposal',
         ],
+        'public' => [
+            'accept' => 'Accept proposal',
+            'accepted_message' => 'Proposal accepted.',
+            'client' => 'Prepared for',
+            'decline' => 'Decline',
+            'declined_message' => 'Proposal declined.',
+            'eyebrow' => 'Commercial proposal',
+            'final_status' => 'This proposal has already received a response.',
+            'no_expiration' => 'No expiration date',
+        ],
         'statuses' => [
             'accepted' => 'Accepted',
             'declined' => 'Declined',
@@ -274,6 +284,9 @@ return [
         'total' => [
             'description' => 'Calculated from proposal item snapshots.',
             'title' => 'Total value',
+        ],
+        'transitions' => [
+            'invalid' => 'This proposal can no longer be changed to the requested status.',
         ],
         'updated' => 'Proposal updated.',
     ],
