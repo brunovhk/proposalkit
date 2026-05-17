@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Proposals;
 
 use App\Enums\ProposalStatus;
+use App\Mail\ProposalAccepted;
+use App\Mail\ProposalDeclined;
 use App\Models\Proposal;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -32,8 +36,45 @@ class TransitionProposalAction
             $lockedProposal->status = $targetStatus;
             $lockedProposal->save();
 
+            $this->queueFinalizedNotification($lockedProposal, $targetStatus);
+
             return $lockedProposal;
         });
+    }
+
+    /**
+     * Queue the tenant-owner notification for client final decisions.
+     */
+    private function queueFinalizedNotification(Proposal $proposal, ProposalStatus $targetStatus): void
+    {
+        $mailable = match ($targetStatus) {
+            ProposalStatus::Accepted => new ProposalAccepted($proposal),
+            ProposalStatus::Declined => new ProposalDeclined($proposal),
+            default => null,
+        };
+
+        if ($mailable === null) {
+            return;
+        }
+
+        $proposal->loadMissing(['client', 'items']);
+
+        $tenant = $proposal->tenant()->first();
+
+        if ($tenant === null) {
+            return;
+        }
+
+        $owner = $tenant
+            ->users()
+            ->oldest('id')
+            ->first();
+
+        if (! $owner instanceof User) {
+            return;
+        }
+
+        Mail::to($owner)->queue($mailable->afterCommit());
     }
 
     /**

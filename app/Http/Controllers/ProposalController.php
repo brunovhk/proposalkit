@@ -17,11 +17,13 @@ use App\Http\Resources\ClientResource;
 use App\Http\Resources\ProposalResource;
 use App\Http\Resources\ServiceResource;
 use App\Jobs\GenerateProposalPdfJob;
+use App\Mail\ProposalSent;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -129,6 +131,10 @@ class ProposalController extends Controller
         $sentProposal = $transitionProposal->execute($proposal, ProposalStatus::Sent);
 
         GenerateProposalPdfJob::dispatch($sentProposal->id);
+        $sentProposal->loadMissing(['client', 'items', 'tenant']);
+
+        Mail::to($sentProposal->client->email)
+            ->queue(new ProposalSent($sentProposal));
 
         return to_route('proposals.index')
             ->with('success', __('ui.proposals.sent'));
