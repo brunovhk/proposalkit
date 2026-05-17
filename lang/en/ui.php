@@ -221,6 +221,33 @@ return [
         'created' => 'Proposal created.',
         'deleted' => 'Proposal deleted.',
         'empty' => 'No proposals found.',
+        'emails' => [
+            'accepted' => [
+                'heading' => 'Proposal Accepted',
+                'intro' => ':client has approved the proposal.',
+                'outro' => 'The proposal is now marked as accepted in your pipeline.',
+                'subject' => 'Proposal Approved: :title | :client',
+            ],
+            'declined' => [
+                'heading' => 'Proposal Declined',
+                'intro' => ':client has declined the proposal.',
+                'outro' => 'The proposal is now marked as declined in your pipeline.',
+                'subject' => 'Proposal Declined: :title | :client',
+            ],
+            'fields' => [
+                'client' => 'Client',
+                'title' => 'Proposal',
+                'total' => 'Total value',
+            ],
+            'sent' => [
+                'button' => 'Review proposal',
+                'greeting' => 'Hello :client,',
+                'intro' => 'A new commercial proposal is ready for your review.',
+                'outro' => 'A PDF copy is attached to this email for your records.',
+                'subject' => 'Commercial Proposal: :title',
+            ],
+            'signature' => 'Regards,',
+        ],
         'fields' => [
             'catalog_service' => 'Catalog service',
             'client' => 'Client',

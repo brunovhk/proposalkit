@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
  * @property string|null $pdf_path
  * @property-read Client $client
  * @property-read Collection<int, ProposalItem> $items
+ * @property-read Tenant $tenant
  */
 class Proposal extends Model
 {
