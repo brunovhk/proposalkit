@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Enums\ProposalStatus;
 use App\Models\Proposal;
 use App\Models\User;
+use App\States\Proposal\Draft;
 
 /**
  * Authorizes access to tenant-owned proposal records.
@@ -77,6 +77,6 @@ class ProposalPolicy
      */
     private function isDraft(Proposal $proposal): bool
     {
-        return $proposal->status === ProposalStatus::Draft;
+        return $proposal->status->equals(Draft::class);
     }
 }

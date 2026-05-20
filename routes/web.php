@@ -11,10 +11,16 @@ Route::inertia('/', 'Welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-Route::get('p/{uuid}', [PublicProposalController::class, 'show'])
-    ->name('public.proposals.show');
-Route::post('p/{uuid}/transition', [PublicProposalController::class, 'transition'])
-    ->name('public.proposals.transition');
+Route::middleware('signed')->group(function (): void {
+    Route::get('p/{tenant_slug}/{secure_token}', [PublicProposalController::class, 'show'])
+        ->name('public.proposals.show');
+    Route::get('p/{tenant_slug}/{secure_token}/pdf', [PublicProposalController::class, 'pdf'])
+        ->name('public.proposals.pdf');
+    Route::post('p/{tenant_slug}/{secure_token}/accept', [PublicProposalController::class, 'accept'])
+        ->name('public.proposals.accept');
+    Route::post('p/{tenant_slug}/{secure_token}/reject', [PublicProposalController::class, 'reject'])
+        ->name('public.proposals.reject');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');

@@ -86,6 +86,21 @@ return [
         'error_title' => 'Something went wrong.',
         'success_title' => 'Success',
     ],
+    'errors' => [
+        '403' => [
+            'body' => 'This proposal link is invalid, expired, or has been changed.',
+            'title' => 'Proposal link unavailable',
+        ],
+        '410' => [
+            'body' => 'This proposal has already been finalized and is no longer available for modifications.',
+            'title' => 'Proposal already finalized',
+        ],
+        '404' => [
+            'body' => 'The page or proposal you requested could not be found.',
+            'title' => 'Page not found',
+        ],
+        'return_home' => 'Return home',
+    ],
     'nav' => [
         'appearance' => 'Appearance',
         'clients' => 'Clients',
@@ -306,19 +321,24 @@ return [
         ],
         'public' => [
             'accept' => 'Accept proposal',
+            'acceptance_confirmation' => 'I confirm that I am authorized to accept this proposal.',
             'accepted_message' => 'Proposal accepted.',
             'client' => 'Prepared for',
             'decline' => 'Decline',
             'declined_message' => 'Proposal declined.',
+            'download_pdf' => 'Download PDF',
             'eyebrow' => 'Commercial proposal',
             'final_status' => 'This proposal has already received a response.',
             'no_expiration' => 'No expiration date',
+            'rejection_reason' => 'Reason for declining',
+            'typed_name' => 'Full legal name',
         ],
         'statuses' => [
             'accepted' => 'Accepted',
             'declined' => 'Declined',
             'draft' => 'Draft',
             'sent' => 'Sent',
+            'viewed' => 'Viewed',
         ],
         'sent' => 'Proposal sent.',
         'table' => [

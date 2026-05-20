@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Models\Proposal;
 use App\Models\ProposalItem;
+use App\Services\PublicProposalUrlGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -23,12 +24,14 @@ class ProposalResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function toArray(Request $request): array
     {
         $proposal = $this->resource;
         assert($proposal instanceof Proposal);
 
         $totalCents = $this->calculateTotalCents($proposal);
+        $urlGenerator = resolve(PublicProposalUrlGenerator::class);
 
         return [
             'id' => $proposal->id,
@@ -56,6 +59,7 @@ class ProposalResource extends JsonResource
                 'edit' => route('proposals.edit', $proposal),
                 'destroy' => route('proposals.destroy', $proposal),
                 'send' => route('proposals.send', $proposal),
+                'public' => $urlGenerator->show($proposal),
             ],
         ];
     }
