@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Enums\ProposalStatus;
 use App\Enums\ServiceType;
 use App\Models\Client;
 use App\Models\Proposal;
+use App\Models\ProposalEvent;
 use App\Models\ProposalItem;
 use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
+use App\States\Proposal\Accepted;
+use App\States\Proposal\Declined;
+use App\States\Proposal\Draft;
+use App\States\Proposal\Sent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -92,7 +96,7 @@ class ProposalControllerTest extends TestCase
             'tenant_id' => $tenant->id,
             'client_id' => $client->id,
             'title' => 'Website Redesign',
-            'status' => ProposalStatus::Draft->value,
+            'status' => Draft::$name,
         ]);
         $this->assertDatabaseHas('proposal_items', [
             'name' => 'Discovery Workshop',
@@ -106,6 +110,57 @@ class ProposalControllerTest extends TestCase
             'type' => ServiceType::Hourly->value,
             'quantity' => 2,
         ]);
+
+        $proposal = Proposal::query()
+            ->where('title', 'Website Redesign')
+            ->sole();
+        $event = ProposalEvent::query()
+            ->where('proposal_id', $proposal->id)
+            ->where('type', 'created')
+            ->sole();
+        $payload = $event->payload;
+
+        $this->assertIsArray($payload);
+        $this->assertSame($user->id, $event->actor_id);
+        $this->assertSame(User::class, $event->actor_type);
+        $this->assertTrue($event->actor?->is($user));
+        $this->assertSame(2, $payload['item_count']);
+    }
+
+    public function test_authenticated_user_update_writes_actor_to_audit_event(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $client = Client::factory()->for($tenant)->create();
+        $proposal = Proposal::factory()
+            ->for($tenant)
+            ->for($client)
+            ->create([
+                'title' => 'Original Proposal',
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->put("/proposals/{$proposal->id}", [
+                'title' => 'Updated Proposal',
+                'client_id' => $client->id,
+                'valid_until' => now()->addDays(20)->toDateString(),
+                'items' => [],
+            ])
+            ->assertRedirect('/proposals')
+            ->assertSessionHas('success', __('ui.proposals.updated'));
+
+        $event = ProposalEvent::query()
+            ->where('proposal_id', $proposal->id)
+            ->where('type', 'updated')
+            ->sole();
+        $payload = $event->payload;
+
+        $this->assertIsArray($payload);
+        $this->assertSame($user->id, $event->actor_id);
+        $this->assertSame(User::class, $event->actor_type);
+        $this->assertTrue($event->actor?->is($user));
+        $this->assertTrue($payload['items_replaced']);
     }
 
     public function test_create_and_edit_forms_receive_catalog_and_item_data(): void
@@ -164,7 +219,7 @@ class ProposalControllerTest extends TestCase
         $proposal = Proposal::factory()
             ->for($tenant)
             ->create([
-                'status' => ProposalStatus::Draft,
+                'status' => Draft::class,
             ]);
 
         $this
@@ -175,8 +230,17 @@ class ProposalControllerTest extends TestCase
 
         $this->assertDatabaseHas('proposals', [
             'id' => $proposal->id,
-            'status' => ProposalStatus::Sent->value,
+            'status' => Sent::$name,
         ]);
+
+        $event = ProposalEvent::query()
+            ->where('proposal_id', $proposal->id)
+            ->where('type', 'transitioned')
+            ->sole();
+
+        $this->assertSame($user->id, $event->actor_id);
+        $this->assertSame(User::class, $event->actor_type);
+        $this->assertTrue($event->actor?->is($user));
     }
 
     public function test_authenticated_user_cannot_send_another_tenants_proposal(): void
@@ -188,7 +252,7 @@ class ProposalControllerTest extends TestCase
         $proposalB = Proposal::factory()
             ->for($tenantB)
             ->create([
-                'status' => ProposalStatus::Draft,
+                'status' => Draft::class,
             ]);
 
         $this
@@ -198,7 +262,7 @@ class ProposalControllerTest extends TestCase
 
         $this->assertDatabaseHas('proposals', [
             'id' => $proposalB->id,
-            'status' => ProposalStatus::Draft->value,
+            'status' => Draft::$name,
         ]);
     }
 
@@ -208,13 +272,14 @@ class ProposalControllerTest extends TestCase
         $user = User::factory()->for($tenant)->create();
         $client = Client::factory()->for($tenant)->create();
 
-        foreach ([ProposalStatus::Sent, ProposalStatus::Accepted, ProposalStatus::Declined] as $status) {
+        foreach ([Sent::class, Accepted::class, Declined::class] as $statusClass) {
+            $statusValue = $statusClass::$name;
             $proposal = Proposal::factory()
                 ->for($tenant)
                 ->for($client)
                 ->create([
-                    'status' => $status,
-                    'title' => "Locked {$status->value} proposal",
+                    'status' => $statusClass,
+                    'title' => "Locked {$statusValue} proposal",
                 ]);
 
             $this
@@ -239,8 +304,8 @@ class ProposalControllerTest extends TestCase
 
             $this->assertDatabaseHas('proposals', [
                 'id' => $proposal->id,
-                'status' => $status->value,
-                'title' => "Locked {$status->value} proposal",
+                'status' => $statusValue,
+                'title' => "Locked {$statusValue} proposal",
             ]);
         }
     }

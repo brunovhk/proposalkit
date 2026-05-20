@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Actions\Proposals\TransitionProposalAction;
-use App\Enums\ProposalStatus;
 use App\Mail\ProposalAccepted;
 use App\Mail\ProposalDeclined;
 use App\Mail\ProposalSent;
 use App\Models\Client;
 use App\Models\Proposal;
+use App\Models\ProposalEvent;
 use App\Models\Tenant;
 use App\Models\User;
+use App\States\Proposal\Accepted;
+use App\States\Proposal\Declined;
+use App\States\Proposal\Draft;
+use App\States\Proposal\Sent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -36,7 +40,7 @@ class ProposalNotificationsTest extends TestCase
             ->for($tenant)
             ->for($client)
             ->create([
-                'status' => ProposalStatus::Draft,
+                'status' => Draft::class,
                 'title' => 'Website Redesign',
             ]);
 
@@ -50,6 +54,42 @@ class ProposalNotificationsTest extends TestCase
             static fn (ProposalSent $mail): bool => $mail->hasTo('buyer@example.com')
                 && $mail->proposal->is($proposal),
         );
+
+        $event = ProposalEvent::query()
+            ->where('proposal_id', $proposal->id)
+            ->where('type', 'transitioned')
+            ->sole();
+        $payload = $event->payload;
+
+        $this->assertIsArray($payload);
+        $this->assertSame($user->id, $event->actor_id);
+        $this->assertSame(User::class, $event->actor_type);
+        $this->assertTrue($event->actor?->is($user));
+        $this->assertSame(Draft::$name, $payload['from']);
+        $this->assertSame(Sent::$name, $payload['to']);
+    }
+
+    public function test_proposal_sent_mail_uses_signed_tenant_slug_and_secure_token_url(): void
+    {
+        $tenant = Tenant::factory()->create([
+            'slug' => 'acme-studio',
+        ]);
+        $client = Client::factory()->for($tenant)->create([
+            'email' => 'buyer@example.com',
+        ]);
+        $proposal = Proposal::factory()
+            ->sent()
+            ->for($tenant)
+            ->for($client)
+            ->create([
+                'valid_until' => now()->addDays(7),
+            ]);
+
+        $html = new ProposalSent($proposal)->render();
+
+        $this->assertStringContainsString("/p/{$tenant->slug}/{$proposal->secure_token}", $html);
+        $this->assertStringContainsString('signature=', $html);
+        $this->assertStringNotContainsString("/p/{$proposal->uuid}", $html);
     }
 
     public function test_proposal_accepted_mail_is_queued_during_successful_acceptance_transition(): void
@@ -67,7 +107,7 @@ class ProposalNotificationsTest extends TestCase
             ->for($client)
             ->create();
 
-        app(TransitionProposalAction::class)->execute($proposal, ProposalStatus::Accepted);
+        resolve(TransitionProposalAction::class)->execute($proposal, Accepted::class);
 
         Mail::assertQueued(
             ProposalAccepted::class,
@@ -91,7 +131,7 @@ class ProposalNotificationsTest extends TestCase
             ->for($client)
             ->create();
 
-        app(TransitionProposalAction::class)->execute($proposal, ProposalStatus::Declined);
+        resolve(TransitionProposalAction::class)->execute($proposal, Declined::class);
 
         Mail::assertQueued(
             ProposalDeclined::class,

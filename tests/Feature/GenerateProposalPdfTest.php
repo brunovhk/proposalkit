@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Enums\ProposalStatus;
 use App\Enums\ServiceType;
 use App\Jobs\GenerateProposalPdfJob;
 use App\Models\Client;
@@ -12,6 +11,7 @@ use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\Tenant;
 use App\Models\User;
+use App\States\Proposal\Draft;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -30,7 +30,7 @@ class GenerateProposalPdfTest extends TestCase
         $proposal = Proposal::factory()
             ->for($tenant)
             ->create([
-                'status' => ProposalStatus::Draft,
+                'status' => Draft::class,
             ]);
 
         $this
@@ -79,7 +79,7 @@ class GenerateProposalPdfTest extends TestCase
                 'quantity' => 4,
             ]);
 
-        (new GenerateProposalPdfJob($proposal->id))->handle();
+        new GenerateProposalPdfJob($proposal->id)->handle();
 
         Storage::disk('proposals')->assertExists("{$proposal->uuid}.pdf");
 
