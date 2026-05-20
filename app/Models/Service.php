@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\ServiceType;
 use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,25 +22,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $price
  * @property ServiceType $type
  */
+#[Fillable([
+    'tenant_id',
+    'name',
+    'description',
+    'price',
+    'type',
+])]
 class Service extends Model
 {
     use BelongsToTenant;
 
     /** @use HasFactory<ServiceFactory> */
     use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'tenant_id',
-        'name',
-        'description',
-        'price',
-        'type',
-    ];
 
     /**
      * Get the tenant that owns the service.
@@ -56,6 +51,7 @@ class Service extends Model
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

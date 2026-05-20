@@ -6,6 +6,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
@@ -39,7 +40,7 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         assert($user instanceof User);
 
