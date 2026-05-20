@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Proposals;
 
+use App\Actions\Concerns\ResolvesAuthenticatedActor;
 use App\Models\Proposal;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -12,12 +14,14 @@ use Illuminate\Support\Facades\DB;
  */
 class UpdateProposal
 {
+    use ResolvesAuthenticatedActor;
+
     /**
      * @param  array<string, mixed>  $attributes
      */
     public function execute(Proposal $proposal, array $attributes): Proposal
     {
-        return DB::transaction(static function () use ($proposal, $attributes): Proposal {
+        return DB::transaction(function () use ($proposal, $attributes): Proposal {
             $items = $attributes['items'] ?? null;
             unset($attributes['items']);
 
@@ -30,6 +34,17 @@ class UpdateProposal
                     $proposal->items()->createMany($items);
                 }
             }
+
+            $proposal->events()->create([
+                'type' => 'updated',
+                'payload' => [
+                    'changed' => array_keys($attributes),
+                    'items_replaced' => is_array($items),
+                    'item_count' => is_array($items) ? count($items) : null,
+                ],
+                ...$this->authenticatedActor(),
+                'occurred_at' => Date::now(),
+            ]);
 
             return $proposal;
         });

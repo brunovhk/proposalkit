@@ -6,6 +6,7 @@ namespace App\Mail;
 
 use App\Mail\Concerns\BuildsProposalMailContent;
 use App\Models\Proposal;
+use App\Services\PublicProposalUrlGenerator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Attachment;
@@ -14,7 +15,6 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 
 /**
  * Notifies a client that a sent proposal is ready for review.
@@ -80,21 +80,11 @@ class ProposalSent extends Mailable implements ShouldQueue
     }
 
     /**
-     * Build the signed public URL for this proposal UUID.
+     * Build the signed public URL for this proposal.
      */
     private function publicProposalUrl(): string
     {
-        if ($this->proposal->valid_until !== null) {
-            return URL::temporarySignedRoute(
-                'public.proposals.show',
-                $this->proposal->valid_until->copy()->endOfDay(),
-                ['uuid' => $this->proposal->uuid],
-            );
-        }
-
-        return URL::signedRoute('public.proposals.show', [
-            'uuid' => $this->proposal->uuid,
-        ]);
+        return resolve(PublicProposalUrlGenerator::class)->show($this->proposal);
     }
 
     /**
