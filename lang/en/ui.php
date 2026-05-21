@@ -116,6 +116,31 @@ return [
         'services' => 'Services',
         'settings' => 'Settings',
     ],
+    'dashboard' => [
+        'charts' => [
+            'state_distribution' => 'Lifecycle distribution',
+            'value_trend' => 'Monthly won value',
+        ],
+        'filters' => [
+            'clear' => 'Clear range',
+            'date_range' => 'Date range',
+            'placeholder' => 'Select date range',
+        ],
+        'index' => [
+            'description' => 'Review proposal performance across your current pipeline and closed work.',
+            'head' => 'Dashboard',
+            'title' => 'Pipeline intelligence',
+        ],
+        'kpis' => [
+            'active_count' => 'Active proposals',
+            'conversion_rate' => 'Conversion rate',
+            'pipeline_value' => 'Total pipeline value',
+            'won_lost' => 'Won vs lost',
+        ],
+        'series' => [
+            'won_value' => 'Won value',
+        ],
+    ],
     'clients' => [
         'actions' => [
             'create' => 'Create client',

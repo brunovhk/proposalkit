@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\PublicProposalController;
 use App\Http\Controllers\ServiceController;
@@ -23,7 +24,7 @@ Route::middleware('signed')->group(function (): void {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('proposals/{proposal}/send', [ProposalController::class, 'markAsSent'])
         ->name('proposals.send');
     Route::resource('proposals', ProposalController::class)->except('show');
