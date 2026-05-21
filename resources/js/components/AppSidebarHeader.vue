@@ -4,7 +4,6 @@ import { Menu } from 'lucide-vue-next';
 import { onUnmounted, ref } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { useNavigation } from '@/composables/useNavigation';
@@ -23,7 +22,7 @@ withDefaults(
 
 const { t } = useTranslations();
 const visible = ref(false);
-const { mainNavItems, footerNavItems } = useNavigation();
+const { mainNavItems } = useNavigation();
 
 const removeFinishListener = router.on('finish', () => {
     visible.value = false;
@@ -68,7 +67,6 @@ onUnmounted(() => {
                 <div class="flex-1">
                     <NavMain :items="mainNavItems" />
                 </div>
-                <NavFooter :items="footerNavItems" />
                 <NavUser />
             </div>
         </Drawer>
