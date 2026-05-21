@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\ServiceType;
 use Database\Factories\ProposalItemFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,23 +21,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ServiceType $type
  * @property int $quantity
  */
+#[Fillable([
+    'proposal_id',
+    'name',
+    'price',
+    'type',
+    'quantity',
+])]
 class ProposalItem extends Model
 {
     /** @use HasFactory<ProposalItemFactory> */
     use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'proposal_id',
-        'name',
-        'price',
-        'type',
-        'quantity',
-    ];
 
     /**
      * Get the proposal that owns this item snapshot.
@@ -53,6 +48,7 @@ class ProposalItem extends Model
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

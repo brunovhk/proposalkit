@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Enums\ProposalStatus;
 use App\Enums\ServiceType;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\Tenant;
 use App\Models\User;
+use App\States\Proposal\Draft;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
@@ -68,7 +68,7 @@ class ProposalArchitectureTest extends TestCase
         $proposal = Proposal::query()->create([
             'client_id' => $client->id,
             'title' => 'Website Redesign Proposal',
-            'status' => ProposalStatus::Draft,
+            'status' => Draft::class,
             'valid_until' => now()->addDays(30)->toDateString(),
         ]);
 
@@ -82,7 +82,7 @@ class ProposalArchitectureTest extends TestCase
             'tenant_id' => $user->tenant_id,
             'client_id' => $client->id,
             'title' => 'Website Redesign Proposal',
-            'status' => ProposalStatus::Draft->value,
+            'status' => Draft::$name,
         ]);
     }
 

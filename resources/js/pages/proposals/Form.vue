@@ -7,7 +7,12 @@ import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 type ServiceTypeValue = 'hourly' | 'fixed';
-type ProposalStatusValue = 'draft' | 'sent' | 'accepted' | 'declined';
+type ProposalStatusValue =
+    | 'draft'
+    | 'sent'
+    | 'viewed'
+    | 'accepted'
+    | 'declined';
 
 type ClientOption = {
     id: number;

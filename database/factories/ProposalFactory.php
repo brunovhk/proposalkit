@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\ProposalStatus;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\Tenant;
+use App\States\Proposal\Accepted;
+use App\States\Proposal\Declined;
+use App\States\Proposal\Draft;
+use App\States\Proposal\Sent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -35,7 +38,7 @@ class ProposalFactory extends Factory
                 ->create(['tenant_id' => (int) $attributes['tenant_id']])
                 ->id,
             'title' => fake()->sentence(4),
-            'status' => ProposalStatus::Draft,
+            'status' => Draft::class,
             'valid_until' => fake()->optional()->dateTimeBetween('now', '+60 days'),
         ];
     }
@@ -46,7 +49,7 @@ class ProposalFactory extends Factory
     public function sent(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => ProposalStatus::Sent,
+            'status' => Sent::class,
         ]);
     }
 
@@ -56,7 +59,7 @@ class ProposalFactory extends Factory
     public function accepted(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => ProposalStatus::Accepted,
+            'status' => Accepted::class,
         ]);
     }
 
@@ -66,7 +69,7 @@ class ProposalFactory extends Factory
     public function declined(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => ProposalStatus::Declined,
+            'status' => Declined::class,
         ]);
     }
 }

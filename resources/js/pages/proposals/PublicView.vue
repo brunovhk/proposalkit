@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { Check, X } from 'lucide-vue-next';
+import { Head, useForm } from '@inertiajs/vue3';
+import { Check, Download, X } from 'lucide-vue-next';
 import { computed } from 'vue';
+import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
-type ProposalStatusValue = 'draft' | 'sent' | 'accepted' | 'declined';
+type ProposalStatusValue =
+    | 'draft'
+    | 'sent'
+    | 'viewed'
+    | 'accepted'
+    | 'declined';
 type ProposalStatusSeverity =
     | 'secondary'
     | 'info'
@@ -31,7 +37,6 @@ type ProposalItemRecord = {
 };
 
 type ProposalRecord = {
-    uuid: string;
     title: string;
     client: {
         id: number;
@@ -59,30 +64,46 @@ type Props = {
     proposal: {
         data: ProposalRecord;
     };
-    transitionUrl: string;
+    acceptUrl: string;
+    pdfUrl: string;
+    rejectUrl: string;
 };
 
 const props = defineProps<Props>();
 
 const { t } = useTranslations();
 const proposal = computed(() => props.proposal.data);
-const canRespond = computed(() => proposal.value.status.value === 'sent');
+const canRespond = computed(() =>
+    ['sent', 'viewed'].includes(proposal.value.status.value),
+);
+
+const acceptForm = useForm({
+    typed_name: '',
+    acceptance_confirmed: false,
+});
+
+const rejectForm = useForm({
+    reason: '',
+});
 
 const statusSeverity: Record<ProposalStatusValue, ProposalStatusSeverity> = {
     draft: 'secondary',
     sent: 'info',
+    viewed: 'warn',
     accepted: 'success',
     declined: 'danger',
 };
 
-function transition(action: 'accepted' | 'declined'): void {
-    router.post(
-        props.transitionUrl,
-        { action },
-        {
-            preserveScroll: true,
-        },
-    );
+function acceptProposal(): void {
+    acceptForm.post(props.acceptUrl, {
+        preserveScroll: true,
+    });
+}
+
+function rejectProposal(): void {
+    rejectForm.post(props.rejectUrl, {
+        preserveScroll: true,
+    });
 }
 </script>
 
@@ -109,11 +130,25 @@ function transition(action: 'accepted' | 'declined'): void {
                     </h1>
                 </div>
 
-                <Tag
-                    :value="proposal.status.label"
-                    :severity="statusSeverity[proposal.status.value]"
-                    rounded
-                />
+                <div class="flex shrink-0 items-center gap-3">
+                    <a
+                        :href="props.pdfUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Button severity="secondary" variant="outlined">
+                            <Download class="size-4" />
+                            <span>{{
+                                t('ui.proposals.public.download_pdf')
+                            }}</span>
+                        </Button>
+                    </a>
+                    <Tag
+                        :value="proposal.status.label"
+                        :severity="statusSeverity[proposal.status.value]"
+                        rounded
+                    />
+                </div>
             </div>
 
             <div class="mt-6 grid gap-4 sm:grid-cols-2">
@@ -223,24 +258,100 @@ function transition(action: 'accepted' | 'declined'): void {
                     </p>
                 </div>
 
-                <div v-if="canRespond" class="flex flex-col gap-3 sm:flex-row">
-                    <Button
-                        severity="success"
-                        size="large"
-                        @click="transition('accepted')"
-                    >
-                        <Check class="size-5" />
-                        <span>{{ t('ui.proposals.public.accept') }}</span>
-                    </Button>
-                    <Button
-                        severity="danger"
-                        size="large"
-                        variant="outlined"
-                        @click="transition('declined')"
-                    >
-                        <X class="size-5" />
-                        <span>{{ t('ui.proposals.public.decline') }}</span>
-                    </Button>
+                <div v-if="canRespond" class="grid gap-6 lg:grid-cols-2">
+                    <form class="space-y-4" @submit.prevent="acceptProposal">
+                        <div class="space-y-2">
+                            <label
+                                for="typed_name"
+                                class="text-sm font-medium text-surface-700 dark:text-surface-200"
+                            >
+                                {{ t('ui.proposals.public.typed_name') }}
+                            </label>
+                            <InputText
+                                id="typed_name"
+                                v-model="acceptForm.typed_name"
+                                fluid
+                                autocomplete="name"
+                                :invalid="Boolean(acceptForm.errors.typed_name)"
+                            />
+                            <InputError
+                                :message="acceptForm.errors.typed_name"
+                            />
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <Checkbox
+                                v-model="acceptForm.acceptance_confirmed"
+                                input-id="acceptance_confirmed"
+                                binary
+                                :invalid="
+                                    Boolean(
+                                        acceptForm.errors.acceptance_confirmed,
+                                    )
+                                "
+                            />
+                            <div class="space-y-1">
+                                <label
+                                    for="acceptance_confirmed"
+                                    class="text-sm text-surface-700 dark:text-surface-200"
+                                >
+                                    {{
+                                        t(
+                                            'ui.proposals.public.acceptance_confirmation',
+                                        )
+                                    }}
+                                </label>
+                                <InputError
+                                    :message="
+                                        acceptForm.errors.acceptance_confirmed
+                                    "
+                                />
+                            </div>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            severity="success"
+                            size="large"
+                            :disabled="acceptForm.processing"
+                            :loading="acceptForm.processing"
+                        >
+                            <Check class="size-5" />
+                            <span>{{ t('ui.proposals.public.accept') }}</span>
+                        </Button>
+                    </form>
+
+                    <form class="space-y-4" @submit.prevent="rejectProposal">
+                        <div class="space-y-2">
+                            <label
+                                for="reason"
+                                class="text-sm font-medium text-surface-700 dark:text-surface-200"
+                            >
+                                {{ t('ui.proposals.public.rejection_reason') }}
+                            </label>
+                            <Textarea
+                                id="reason"
+                                v-model="rejectForm.reason"
+                                class="w-full"
+                                rows="4"
+                                auto-resize
+                                :invalid="Boolean(rejectForm.errors.reason)"
+                            />
+                            <InputError :message="rejectForm.errors.reason" />
+                        </div>
+
+                        <Button
+                            type="submit"
+                            severity="danger"
+                            size="large"
+                            variant="outlined"
+                            :disabled="rejectForm.processing"
+                            :loading="rejectForm.processing"
+                        >
+                            <X class="size-5" />
+                            <span>{{ t('ui.proposals.public.decline') }}</span>
+                        </Button>
+                    </form>
                 </div>
 
                 <div v-else class="max-w-sm">

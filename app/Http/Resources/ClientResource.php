@@ -20,6 +20,7 @@ class ClientResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function toArray(Request $request): array
     {
         $client = $this->resource;

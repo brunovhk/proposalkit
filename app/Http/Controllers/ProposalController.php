@@ -8,7 +8,6 @@ use App\Actions\Proposals\CreateProposal;
 use App\Actions\Proposals\DeleteProposal;
 use App\Actions\Proposals\TransitionProposalAction;
 use App\Actions\Proposals\UpdateProposal;
-use App\Enums\ProposalStatus;
 use App\Http\Requests\Proposals\DeleteProposalRequest;
 use App\Http\Requests\Proposals\SendProposalRequest;
 use App\Http\Requests\Proposals\StoreProposalRequest;
@@ -21,6 +20,7 @@ use App\Mail\ProposalSent;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\Service;
+use App\States\Proposal\Sent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
@@ -128,9 +128,9 @@ class ProposalController extends Controller
     ): RedirectResponse {
         $request->validated();
 
-        $sentProposal = $transitionProposal->execute($proposal, ProposalStatus::Sent);
+        $sentProposal = $transitionProposal->execute($proposal, Sent::class);
 
-        GenerateProposalPdfJob::dispatch($sentProposal->id);
+        dispatch(new GenerateProposalPdfJob($sentProposal->id));
         $sentProposal->loadMissing(['client', 'items', 'tenant']);
 
         Mail::to($sentProposal->client->email)

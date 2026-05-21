@@ -4,52 +4,76 @@ declare(strict_types=1);
 
 namespace App\Actions\Proposals;
 
-use App\Enums\ProposalStatus;
+use App\Actions\Concerns\ResolvesAuthenticatedActor;
 use App\Mail\ProposalAccepted;
 use App\Mail\ProposalDeclined;
 use App\Models\Proposal;
 use App\Models\User;
+use App\States\Proposal\Accepted;
+use App\States\Proposal\Declined;
+use App\States\Proposal\ProposalState;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
+use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 
 /**
  * Transitions a proposal status inside a locked transaction to prevent double-submit races.
  */
 class TransitionProposalAction
 {
+    use ResolvesAuthenticatedActor;
+
     /**
      * Transition the proposal to the requested target status.
      *
+     * @param  class-string<ProposalState>  $targetStateClass
+     *
      * @throws ValidationException
      */
-    public function execute(Proposal $proposal, ProposalStatus $targetStatus): Proposal
+    public function execute(Proposal $proposal, string $targetStateClass): Proposal
     {
-        return DB::transaction(function () use ($proposal, $targetStatus): Proposal {
+        return DB::transaction(function () use ($proposal, $targetStateClass): Proposal {
             $lockedProposal = Proposal::query()
                 ->whereKey($proposal->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->ensureTransitionIsAllowed($lockedProposal->status, $targetStatus);
+            $previousStatus = $lockedProposal->status;
 
-            $lockedProposal->status = $targetStatus;
-            $lockedProposal->save();
+            try {
+                $lockedProposal = $lockedProposal->status->transitionTo($targetStateClass);
+            } catch (CouldNotPerformTransition) {
+                throw ValidationException::withMessages([
+                    'status' => __('ui.proposals.transitions.invalid'),
+                ]);
+            }
 
-            $this->queueFinalizedNotification($lockedProposal, $targetStatus);
+            $lockedProposal->events()->create([
+                'type' => 'transitioned',
+                'payload' => [
+                    'from' => $previousStatus->getValue(),
+                    'to' => $targetStateClass::getMorphClass(),
+                ],
+                ...$this->authenticatedActor(),
+                'occurred_at' => Date::now(),
+            ]);
+
+            $this->queueFinalizedNotification($lockedProposal, $targetStateClass);
 
             return $lockedProposal;
         });
     }
 
     /**
-     * Queue the tenant-owner notification for client final decisions.
+     * @param  class-string<ProposalState>  $targetStateClass
      */
-    private function queueFinalizedNotification(Proposal $proposal, ProposalStatus $targetStatus): void
+    private function queueFinalizedNotification(Proposal $proposal, string $targetStateClass): void
     {
-        $mailable = match ($targetStatus) {
-            ProposalStatus::Accepted => new ProposalAccepted($proposal),
-            ProposalStatus::Declined => new ProposalDeclined($proposal),
+        $mailable = match ($targetStateClass) {
+            Accepted::class => new ProposalAccepted($proposal),
+            Declined::class => new ProposalDeclined($proposal),
             default => null,
         };
 
@@ -57,13 +81,9 @@ class TransitionProposalAction
             return;
         }
 
-        $proposal->loadMissing(['client', 'items']);
+        $proposal->loadMissing(['client', 'items', 'tenant']);
 
-        $tenant = $proposal->tenant()->first();
-
-        if ($tenant === null) {
-            return;
-        }
+        $tenant = $proposal->tenant;
 
         $owner = $tenant
             ->users()
@@ -75,29 +95,5 @@ class TransitionProposalAction
         }
 
         Mail::to($owner)->queue($mailable->afterCommit());
-    }
-
-    /**
-     * Ensure the requested state transition is part of the allowed lifecycle.
-     *
-     * @throws ValidationException
-     */
-    private function ensureTransitionIsAllowed(
-        ProposalStatus $currentStatus,
-        ProposalStatus $targetStatus,
-    ): void {
-        $allowedTargets = match ($currentStatus) {
-            ProposalStatus::Draft => [ProposalStatus::Sent],
-            ProposalStatus::Sent => [ProposalStatus::Accepted, ProposalStatus::Declined],
-            ProposalStatus::Accepted, ProposalStatus::Declined => [],
-        };
-
-        if (in_array($targetStatus, $allowedTargets, true)) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'status' => __('ui.proposals.transitions.invalid'),
-        ]);
     }
 }

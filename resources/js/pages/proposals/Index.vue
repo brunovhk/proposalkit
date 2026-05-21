@@ -5,7 +5,12 @@ import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
-type ProposalStatusValue = 'draft' | 'sent' | 'accepted' | 'declined';
+type ProposalStatusValue =
+    | 'draft'
+    | 'sent'
+    | 'viewed'
+    | 'accepted'
+    | 'declined';
 type ProposalStatusSeverity =
     | 'secondary'
     | 'info'
@@ -38,6 +43,7 @@ type ProposalRecord = {
         edit: string;
         destroy: string;
         send: string;
+        public: string;
     };
 };
 
@@ -67,6 +73,7 @@ const deleteDialogVisible = computed({
 const statusSeverity: Record<ProposalStatusValue, ProposalStatusSeverity> = {
     draft: 'secondary',
     sent: 'info',
+    viewed: 'warn',
     accepted: 'success',
     declined: 'danger',
 };
@@ -93,7 +100,7 @@ function sendProposal(proposal: ProposalRecord): void {
 }
 
 function publicProposalUrl(proposal: ProposalRecord): string {
-    return `/p/${proposal.uuid}`;
+    return proposal.urls.public;
 }
 
 function destroyProposal(): void {
