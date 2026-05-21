@@ -31,8 +31,8 @@ class RegistrationTest extends TestCase
     public function test_new_users_can_register(): void
     {
         $response = $this->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Acme Studio',
+            'email' => 'demo@proposalkit.test',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -46,11 +46,11 @@ class RegistrationTest extends TestCase
 
         $this->assertDatabaseHas('tenants', [
             'id' => $user->tenant_id,
-            'name' => "Test User's Company",
+            'name' => "Acme Studio's Company",
         ]);
 
         $this->assertDatabaseHas('users', [
-            'email' => 'test@example.com',
+            'email' => 'demo@proposalkit.test',
             'tenant_id' => $user->tenant_id,
         ]);
     }

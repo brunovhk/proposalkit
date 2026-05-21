@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Seeds the default tenant-backed development account.
@@ -19,15 +20,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $tenant = Tenant::factory()->create([
-            'name' => 'ProposalKit Demo Company',
+            'name' => 'Acme Studio',
+            'slug' => 'acme-studio',
         ]);
 
         User::factory()->for($tenant)->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Acme Demo',
+            'email' => 'demo@proposalkit.test',
+            'password' => Hash::make('demo'),
+        ]);
+
+        $this->call([
+            DemoSeeder::class,
         ]);
     }
 }

@@ -40,6 +40,7 @@
         "@inertiajs/vue3": "^3.1.1",
         "@primeuix/themes": "^2.0.3",
         "@vueuse/core": "^12.8.2",
+        "chart.js": "^4.5.1",
         "laravel-vite-plugin": "^3.1",
         "lucide-vue-next": "^0.468.0",
         "primevue": "^4.5.5",
