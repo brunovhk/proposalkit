@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Check, Download, X } from 'lucide-vue-next';
+import { Check, Download, X } from '@lucide/vue';
 import { computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { Eye, Pencil, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import ServiceDetailDialog from '@/components/services/ServiceDetailDialog.vue';

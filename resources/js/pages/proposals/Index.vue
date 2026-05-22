@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { ExternalLink, Pencil, Plus, Send, Trash2 } from 'lucide-vue-next';
+import { ExternalLink, Pencil, Plus, Send, Trash2 } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';

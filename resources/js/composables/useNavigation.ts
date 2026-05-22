@@ -3,7 +3,7 @@ import {
     FileText,
     LayoutGrid,
     UsersRound,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';

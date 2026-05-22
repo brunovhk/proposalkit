@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { LogOut, Settings } from 'lucide-vue-next';
+import { LogOut, Settings } from '@lucide/vue';
 import type Menu from 'primevue/menu';
 import type { MenuItem } from 'primevue/menuitem';
 import { computed, ref } from 'vue';
