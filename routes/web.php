@@ -6,11 +6,8 @@ use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\PublicProposalController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
-Route::inertia('/', 'Welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::inertia('/', 'marketing/Index')->name('home');
 
 Route::middleware('signed')->group(function (): void {
     Route::get('p/{tenant_slug}/{secure_token}', [PublicProposalController::class, 'show'])

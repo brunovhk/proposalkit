@@ -114,6 +114,40 @@ return [
         'services' => 'Services',
         'settings' => 'Settings',
     ],
+    'landing' => [
+        'actions' => [
+            'live_demo' => 'Live Demo',
+            'sign_in' => 'Sign In',
+        ],
+        'brand' => 'ProposalKit',
+        'eyebrow' => 'Commercial proposal infrastructure',
+        'head' => 'ProposalKit',
+        'pillars' => [
+            'access' => [
+                'description' => 'HMAC-signed recipient routing pairs secure proposal links with an immutable append-only audit trail.',
+                'title' => 'Cryptographic Access',
+            ],
+            'label' => 'Product architectural pillars',
+            'lifecycle' => [
+                'description' => 'Spatie Model States power class-based transition guardrails for every proposal state change.',
+                'title' => 'Strict Lifecycle Engine',
+            ],
+            'tenancy' => [
+                'description' => 'Tenant-aware data boundaries rely on global scopes and explicit isolation rules throughout the domain.',
+                'title' => 'Multi-Tenant Architecture',
+            ],
+        ],
+        'stack' => [
+            'label' => 'Technology stack',
+            'laravel' => 'Laravel 13',
+            'php' => 'PHP 8.4',
+            'redis' => 'Redis',
+            'state_machine' => 'Spatie State Machine',
+            'vue' => 'Vue 3',
+        ],
+        'subtitle' => 'A multi-tenant platform for generating, tracking, and securing commercial proposals.',
+        'title' => 'ProposalKit',
+    ],
     'dashboard' => [
         'charts' => [
             'state_distribution' => 'Lifecycle distribution',
