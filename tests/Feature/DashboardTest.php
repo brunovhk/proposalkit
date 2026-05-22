@@ -40,7 +40,7 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $response->assertInertia(
             fn (AssertableInertia $page): AssertableInertia => $page
-                ->component('Dashboard/Index')
+                ->component('dashboard/Index')
                 ->has('metrics')
                 ->has('filters'),
         );

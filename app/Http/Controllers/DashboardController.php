@@ -35,7 +35,7 @@ final class DashboardController extends Controller
             to: $request->endDate(),
         );
 
-        return Inertia::render('Dashboard/Index', [
+        return Inertia::render('dashboard/Index', [
             'metrics' => $metrics,
             'filters' => [
                 'start_date' => $request->startDate()?->toDateString(),
