@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { ExternalLink, Pencil, Plus, Send, Trash2 } from '@lucide/vue';
+import { ExternalLink, Eye, Pencil, Plus, Send, Trash2 } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -57,6 +57,7 @@ const props = defineProps<Props>();
 
 const { t } = useTranslations();
 const proposalPendingDelete = ref<ProposalRecord | null>(null);
+const proposalPendingDetail = ref<ProposalRecord | null>(null);
 
 const proposalsUrl = '/proposals';
 const createProposalUrl = '/proposals/create';
@@ -66,6 +67,15 @@ const deleteDialogVisible = computed({
     set: (visible: boolean) => {
         if (!visible) {
             proposalPendingDelete.value = null;
+        }
+    },
+});
+
+const detailDialogVisible = computed({
+    get: () => proposalPendingDetail.value !== null,
+    set: (visible: boolean) => {
+        if (!visible) {
+            proposalPendingDetail.value = null;
         }
     },
 });
@@ -91,6 +101,18 @@ watchEffect(() => {
 
 function requestDelete(proposal: ProposalRecord): void {
     proposalPendingDelete.value = proposal;
+}
+
+function requestDetail(proposal: ProposalRecord): void {
+    proposalPendingDetail.value = proposal;
+}
+
+function canViewPublicLink(status: ProposalStatusValue): boolean {
+    return ['sent', 'viewed'].includes(status);
+}
+
+function canViewInternalDetails(status: ProposalStatusValue): boolean {
+    return ['accepted', 'declined'].includes(status);
 }
 
 function sendProposal(proposal: ProposalRecord): void {
@@ -236,7 +258,7 @@ function destroyProposal(): void {
                                 <Trash2 class="size-4" />
                             </Button>
                             <a
-                                v-if="data.status.value !== 'draft'"
+                                v-if="canViewPublicLink(data.status.value)"
                                 :href="publicProposalUrl(data)"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -251,6 +273,17 @@ function destroyProposal(): void {
                                     <ExternalLink class="size-4" />
                                 </Button>
                             </a>
+                            <Button
+                                v-if="canViewInternalDetails(data.status.value)"
+                                severity="secondary"
+                                variant="text"
+                                :aria-label="
+                                    t('ui.proposals.actions.view_details')
+                                "
+                                @click="requestDetail(data)"
+                            >
+                                <Eye class="size-4" />
+                            </Button>
                         </div>
                     </template>
                 </Column>
@@ -295,5 +328,92 @@ function destroyProposal(): void {
                 </Button>
             </div>
         </template>
+    </Dialog>
+
+    <Dialog
+        v-model:visible="detailDialogVisible"
+        modal
+        :header="t('ui.proposals.detail.title')"
+        class="mx-4 w-full max-w-lg"
+    >
+        <div v-if="proposalPendingDetail" class="grid gap-5">
+            <section class="grid gap-2">
+                <p
+                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                >
+                    {{ t('ui.proposals.fields.title') }}
+                </p>
+                <h2
+                    class="text-xl font-semibold text-surface-950 dark:text-surface-0"
+                >
+                    {{ proposalPendingDetail.title }}
+                </h2>
+            </section>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <section class="grid gap-2">
+                    <p
+                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                    >
+                        {{ t('ui.proposals.fields.client') }}
+                    </p>
+                    <p
+                        class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                    >
+                        {{ proposalPendingDetail.client.name }}
+                    </p>
+                    <p
+                        class="text-xs break-words text-surface-500 dark:text-surface-400"
+                    >
+                        {{ proposalPendingDetail.client.email }}
+                    </p>
+                </section>
+
+                <section class="grid gap-2">
+                    <p
+                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                    >
+                        {{ t('ui.proposals.table.status') }}
+                    </p>
+                    <div>
+                        <Tag
+                            :value="proposalPendingDetail.status.label"
+                            :severity="
+                                statusSeverity[
+                                    proposalPendingDetail.status.value
+                                ]
+                            "
+                            rounded
+                        />
+                    </div>
+                </section>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <section class="grid gap-2">
+                    <p
+                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                    >
+                        {{ t('ui.proposals.table.total') }}
+                    </p>
+                    <p class="text-sm font-semibold text-green-300">
+                        {{ proposalPendingDetail.total.formatted }}
+                    </p>
+                </section>
+
+                <section class="grid gap-2">
+                    <p
+                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                    >
+                        {{ t('ui.proposals.table.valid_until') }}
+                    </p>
+                    <p
+                        class="text-sm font-medium text-surface-950 dark:text-surface-0"
+                    >
+                        {{ proposalPendingDetail.valid_until.formatted ?? '' }}
+                    </p>
+                </section>
+            </div>
+        </div>
     </Dialog>
 </template>

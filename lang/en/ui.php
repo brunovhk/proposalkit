@@ -298,6 +298,7 @@ return [
             'delete' => 'Delete proposal',
             'save' => 'Save proposal',
             'send' => 'Send proposal',
+            'view_details' => 'View proposal details',
             'view_public' => 'View public proposal',
         ],
         'confirm_delete' => [
@@ -306,6 +307,9 @@ return [
         ],
         'created' => 'Proposal created.',
         'deleted' => 'Proposal deleted.',
+        'detail' => [
+            'title' => 'Proposal details',
+        ],
         'empty' => 'No proposals found.',
         'emails' => [
             'accepted' => [
