@@ -69,6 +69,10 @@ class HandleInertiaRequests extends Middleware
 
     private function stringFlash(Request $request, string $key): ?string
     {
+        if (! $request->hasSession()) {
+            return null;
+        }
+
         $message = $request->session()->get($key);
 
         return is_string($message) ? $message : null;

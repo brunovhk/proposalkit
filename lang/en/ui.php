@@ -89,16 +89,28 @@ return [
     ],
     'errors' => [
         '403' => [
-            'body' => 'This proposal link is invalid, expired, or has been changed.',
-            'title' => 'Proposal link unavailable',
-        ],
-        '410' => [
-            'body' => 'This proposal has already been finalized and is no longer available for modifications.',
-            'title' => 'Proposal already finalized',
+            'body' => 'Sorry, you are forbidden from accessing this page.',
+            'title' => '403: Forbidden',
         ],
         '404' => [
-            'body' => 'The page or proposal you requested could not be found.',
-            'title' => 'Page not found',
+            'body' => 'Sorry, the page you are looking for could not be found.',
+            'title' => '404: Page Not Found',
+        ],
+        '405' => [
+            'body' => 'Sorry, this request method is not allowed for this page.',
+            'title' => '405: Method Not Allowed',
+        ],
+        '410' => [
+            'body' => 'This proposal has already been finalized and is no longer available.',
+            'title' => '410: Gone',
+        ],
+        '500' => [
+            'body' => 'Whoops, something went wrong on our servers.',
+            'title' => '500: Server Error',
+        ],
+        '503' => [
+            'body' => 'Sorry, we are doing some maintenance. Please check back soon.',
+            'title' => '503: Service Unavailable',
         ],
         'return_home' => 'Return home',
     ],

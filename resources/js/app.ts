@@ -78,6 +78,8 @@ createInertiaApp({
         switch (true) {
             case name === 'marketing/Index':
                 return null;
+            case name.startsWith('errors/'):
+                return null;
             case name === 'proposals/PublicView':
                 return PublicLayout;
             case name.startsWith('auth/'):
