@@ -85,8 +85,8 @@ watchEffect(() => {
                 <Password
                     input-id="password"
                     required
-                    :tabindex="3"
                     autocomplete="new-password"
+                    :input-props="{ tabindex: 3 }"
                     name="password"
                     :placeholder="t('ui.fields.password')"
                     :invalid="Boolean(errors.password)"
@@ -104,8 +104,8 @@ watchEffect(() => {
                 <Password
                     input-id="password_confirmation"
                     required
-                    :tabindex="4"
                     autocomplete="new-password"
+                    :input-props="{ tabindex: 4 }"
                     name="password_confirmation"
                     :placeholder="t('ui.fields.confirm_password')"
                     :invalid="Boolean(errors.password_confirmation)"

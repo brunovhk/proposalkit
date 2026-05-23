@@ -96,8 +96,8 @@ watchEffect(() => {
                     input-id="password"
                     name="password"
                     required
-                    :tabindex="2"
                     autocomplete="current-password"
+                    :input-props="{ tabindex: 2 }"
                     :placeholder="t('ui.fields.password')"
                     :invalid="Boolean(errors.password)"
                     :feedback="false"
