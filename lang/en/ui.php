@@ -116,6 +116,7 @@ return [
     ],
     'landing' => [
         'actions' => [
+            'back_to_home' => 'Back to homepage',
             'live_demo' => 'Live Demo',
             'sign_in' => 'Sign In',
         ],

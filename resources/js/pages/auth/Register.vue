@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/vue3';
+import { ArrowLeft } from '@lucide/vue';
 import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { useTranslations } from '@/composables/useTranslations';
-import { login } from '@/routes';
+import { home, login } from '@/routes';
 import { store } from '@/routes/register';
 
 const { t } = useTranslations();
@@ -19,6 +20,19 @@ watchEffect(() => {
 
 <template>
     <Head :title="t('ui.auth.register.head')" />
+
+    <Teleport to="body">
+        <Link
+            :href="home()"
+            class="group absolute top-6 left-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 md:top-8 md:left-8 dark:text-slate-400 dark:hover:text-slate-100"
+        >
+            <ArrowLeft
+                class="size-4 transition-transform group-hover:-translate-x-0.5"
+                aria-hidden="true"
+            />
+            <span>{{ t('ui.landing.actions.back_to_home') }}</span>
+        </Link>
+    </Teleport>
 
     <Form
         v-bind="store.form()"
