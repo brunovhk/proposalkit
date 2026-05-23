@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Workflow } from '@lucide/vue';
 import { siLaravel, siPhp, siRedis, siVuedotjs } from 'simple-icons';
 import type { SimpleIcon } from 'simple-icons';
@@ -35,6 +35,11 @@ const simpleIconColor = (icon: SimpleIcon): string => {
 };
 
 const { t } = useTranslations();
+const demoForm = useForm<Record<string, never>>({});
+
+const submitDemoLogin = (): void => {
+    demoForm.post('/demo/login');
+};
 
 const stackItems: StackItem[] = [
     {
@@ -154,12 +159,15 @@ const pillarCards: PillarCard[] = [
                     </div>
 
                     <div class="flex flex-col gap-3 sm:flex-row">
-                        <button
-                            type="button"
-                            class="inline-flex h-12 items-center justify-center rounded-md bg-cyan-600 px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition duration-200 hover:scale-[1.02] hover:bg-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 focus-visible:outline-none active:scale-[0.99] dark:bg-cyan-300 dark:text-slate-950 dark:shadow-cyan-950/40 dark:hover:bg-cyan-200 dark:focus-visible:ring-cyan-300 dark:focus-visible:ring-offset-slate-950"
-                        >
-                            {{ t('ui.landing.actions.live_demo') }}
-                        </button>
+                        <form @submit.prevent="submitDemoLogin">
+                            <button
+                                type="submit"
+                                class="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-cyan-600 px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition duration-200 hover:scale-[1.02] hover:bg-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 focus-visible:outline-none active:scale-[0.99] disabled:pointer-events-none disabled:opacity-70 dark:bg-cyan-300 dark:text-slate-950 dark:shadow-cyan-950/40 dark:hover:bg-cyan-200 dark:focus-visible:ring-cyan-300 dark:focus-visible:ring-offset-slate-950"
+                                :disabled="demoForm.processing"
+                            >
+                                {{ t('ui.landing.actions.live_demo') }}
+                            </button>
+                        </form>
                         <Link
                             :href="login()"
                             class="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition duration-200 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 focus-visible:outline-none dark:border-slate-700 dark:bg-transparent dark:text-slate-400 dark:hover:border-slate-500 dark:hover:bg-slate-900 dark:hover:text-slate-100 dark:focus-visible:ring-cyan-300 dark:focus-visible:ring-offset-slate-950"

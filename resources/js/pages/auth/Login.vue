@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Form, Head, Link, setLayoutProps } from '@inertiajs/vue3';
+import { Form, Head, Link, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
-import { watchEffect } from 'vue';
+import { computed, watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -9,13 +9,17 @@ import { home, register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
-defineProps<{
+const props = defineProps<{
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
 }>();
 
+const page = usePage();
 const { t } = useTranslations();
+const showRegistrationLink = computed(
+    () => props.canRegister && page.props.live_demo_enabled !== true,
+);
 
 watchEffect(() => {
     setLayoutProps({
@@ -132,7 +136,7 @@ watchEffect(() => {
 
         <div
             class="text-center text-sm text-surface-500 dark:text-surface-400"
-            v-if="canRegister"
+            v-if="showRegistrationLink"
         >
             {{ t('ui.auth.login.no_account') }}
             <TextLink :href="register()" :tabindex="5">

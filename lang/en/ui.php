@@ -85,6 +85,7 @@ return [
     'messages' => [
         'error_title' => 'Something went wrong.',
         'success_title' => 'Success',
+        'warning_title' => 'Warning',
     ],
     'errors' => [
         '403' => [

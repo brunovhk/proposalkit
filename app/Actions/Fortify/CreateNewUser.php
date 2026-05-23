@@ -8,9 +8,11 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Creates a tenant-backed user account during Fortify registration.
@@ -29,6 +31,8 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        $this->ensureRegistrationAllowed();
+
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
@@ -46,5 +50,15 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
         });
+    }
+
+    /**
+     * Block registration submissions when self-service signups are disabled.
+     */
+    private function ensureRegistrationAllowed(): void
+    {
+        if (Config::boolean('app.live_demo_enabled', false)) {
+            throw new NotFoundHttpException;
+        }
     }
 }

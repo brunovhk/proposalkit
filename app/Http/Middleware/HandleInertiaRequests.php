@@ -9,6 +9,11 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     /**
+     * @var list<string>
+     */
+    private const array FLASH_KEYS = ['success', 'warning', 'error'];
+
+    /**
      * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
@@ -44,17 +49,29 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'flash' => [
-                'success' => function () use ($request): ?string {
-                    $message = $request->session()->get('success');
-
-                    return is_string($message) ? $message : null;
-                },
-            ],
+            'flash' => fn (): array => $this->flashMessages($request),
             'locale' => app()->getLocale(),
+            'live_demo_enabled' => config('app.live_demo_enabled') === true,
             'translations' => fn (): array => $this->translations(app()->getLocale()),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    private function flashMessages(Request $request): array
+    {
+        return collect(self::FLASH_KEYS)
+            ->mapWithKeys(fn (string $key): array => [$key => $this->stringFlash($request, $key)])
+            ->all();
+    }
+
+    private function stringFlash(Request $request, string $key): ?string
+    {
+        $message = $request->session()->get($key);
+
+        return is_string($message) ? $message : null;
     }
 
     /**
