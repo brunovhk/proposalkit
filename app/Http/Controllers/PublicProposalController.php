@@ -20,7 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
  * Renders and processes signed public proposal access by tenant slug and secure token.
@@ -60,7 +60,7 @@ class PublicProposalController extends Controller
         string $secure_token,
         ResolvePublicProposalAction $resolvePublicProposal,
         DownloadPublicProposalPdfAction $downloadPublicProposalPdf,
-    ): StreamedResponse {
+    ): SymfonyResponse {
         $proposal = $resolvePublicProposal->execute($tenant_slug, $secure_token);
 
         if ($proposal->status->equals(Draft::class)) {

@@ -226,9 +226,10 @@ class PublicProposalSecurityTest extends TestCase
         $response = $this
             ->get($this->pdfUrl($proposal))
             ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "inline; filename=\"{$proposal->uuid}.pdf\"");
 
-        $this->assertStringContainsString('%PDF-1.4 test content', $response->streamedContent());
+        $this->assertStringContainsString('%PDF-1.4 test content', (string) $response->getContent());
     }
 
     public function test_signed_pdf_download_returns_not_found_when_file_is_missing(): void
@@ -244,6 +245,26 @@ class PublicProposalSecurityTest extends TestCase
         $this
             ->get($this->pdfUrl($proposal))
             ->assertNotFound();
+    }
+
+    public function test_signed_pdf_download_generates_missing_file_on_live_demo(): void
+    {
+        Storage::fake('proposals');
+        config(['app.live_demo_enabled' => true]);
+
+        $proposal = Proposal::factory()
+            ->sent()
+            ->create([
+                'valid_until' => now()->addDays(10),
+            ]);
+
+        $response = $this
+            ->get($this->pdfUrl($proposal))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "inline; filename=\"{$proposal->uuid}.pdf\"");
+
+        $this->assertStringStartsWith('%PDF-', (string) $response->getContent());
     }
 
     public function test_pdf_download_blocks_tampered_signed_requests(): void
