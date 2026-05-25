@@ -11,6 +11,7 @@ use App\States\Proposal\Accepted;
 use App\States\Proposal\Declined;
 use App\States\Proposal\Draft;
 use App\States\Proposal\Sent;
+use App\States\Proposal\Viewed;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -32,14 +33,33 @@ class ProposalFactory extends Factory
      */
     public function definition(): array
     {
+        $status = fake()->randomElement(['draft', 'sent', 'viewed', 'accepted', 'declined']);
+        $createdAt = now()
+            ->subDays(random_int(0, 365))
+            ->subHours(random_int(0, 23))
+            ->subMinutes(random_int(0, 59));
+
         return [
             'tenant_id' => Tenant::factory(),
             'client_id' => static fn (array $attributes): int => Client::factory()
                 ->create(['tenant_id' => (int) $attributes['tenant_id']])
                 ->id,
             'title' => fake()->sentence(4),
-            'status' => Draft::class,
-            'valid_until' => fake()->optional()->dateTimeBetween('now', '+60 days'),
+            'status' => match ($status) {
+                'sent' => Sent::class,
+                'viewed' => Viewed::class,
+                'accepted' => Accepted::class,
+                'declined' => Declined::class,
+                default => Draft::class,
+            },
+            'valid_until' => $createdAt->copy()->addDays(30),
+            'created_at' => $createdAt,
+            'updated_at' => match ($status) {
+                'sent' => $createdAt->copy()->addDays(1),
+                'viewed' => $createdAt->copy()->addDays(2),
+                'accepted', 'declined' => $createdAt->copy()->addDays(random_int(3, 10)),
+                default => $createdAt->copy()->addHours(random_int(1, 12)),
+            },
         ];
     }
 

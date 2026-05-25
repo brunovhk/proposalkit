@@ -72,8 +72,8 @@ final class DemoSeederTest extends TestCase
         $this->assertSame(1, User::query()->where('email', 'demo@proposalkit.test')->count());
         $this->assertSame(30, Client::query()->whereBelongsTo($tenant)->count());
         $this->assertSame(10, Service::query()->whereBelongsTo($tenant)->count());
-        $this->assertSame(80, Proposal::query()->whereBelongsTo($tenant)->count());
-        $this->assertGreaterThan(80, ProposalEvent::query()->whereIn('proposal_id', $proposalIds)->count());
+        $this->assertSame(200, Proposal::query()->whereBelongsTo($tenant)->count());
+        $this->assertGreaterThan(200, ProposalEvent::query()->whereIn('proposal_id', $proposalIds)->count());
         $this->assertDatabaseHas('users', [
             'id' => $otherUser->id,
             'tenant_id' => $otherTenant->id,

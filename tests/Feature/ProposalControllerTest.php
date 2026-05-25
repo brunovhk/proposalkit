@@ -137,6 +137,7 @@ class ProposalControllerTest extends TestCase
             ->for($client)
             ->create([
                 'title' => 'Original Proposal',
+                'status' => Draft::class,
             ]);
 
         $this
@@ -176,6 +177,7 @@ class ProposalControllerTest extends TestCase
             ->for($client)
             ->create([
                 'title' => 'Editable Proposal',
+                'status' => Draft::class,
             ]);
         ProposalItem::factory()
             ->for($proposal)
