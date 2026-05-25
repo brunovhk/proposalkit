@@ -42,7 +42,14 @@ class ProposalController extends Controller
         return Inertia::render('proposals/Index', [
             'proposals' => ProposalResource::collection(
                 Proposal::query()
-                    ->with(['client', 'items', 'tenant'])
+                    ->with([
+                        'client',
+                        'items',
+                        'tenant',
+                        'events' => static fn ($query) => $query
+                            ->whereIn('type', ['accepted', 'rejected'])
+                            ->latest('occurred_at'),
+                    ])
                     ->latest()
                     ->get(),
             ),

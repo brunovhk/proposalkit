@@ -39,6 +39,10 @@ type ProposalRecord = {
         cents: number;
         formatted: string;
     };
+    finalized_metadata: {
+        accepted_by_name: string | null;
+        refusal_reason: string | null;
+    };
     urls: {
         edit: string;
         destroy: string;
@@ -167,7 +171,7 @@ function destroyProposal(): void {
                 data-key="id"
                 :paginator="props.proposals.data.length > 10"
                 :rows="10"
-                table-style="min-width: 58rem"
+                tableStyle="min-width: 58rem"
             >
                 <Column field="title" :header="t('ui.proposals.table.title')">
                     <template #body="{ data }: { data: ProposalRecord }">
@@ -196,13 +200,18 @@ function destroyProposal(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.proposals.table.status')">
+                <Column
+                    :header="t('ui.proposals.table.status')"
+                    style="max-width: 100px"
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <Tag
-                            :value="data.status.label"
-                            :severity="statusSeverity[data.status.value]"
-                            rounded
-                        />
+                        <div class="flex items-center justify-center">
+                            <Tag
+                                :value="data.status.label"
+                                :severity="statusSeverity[data.status.value]"
+                                rounded
+                            />
+                        </div>
                     </template>
                 </Column>
 
@@ -214,7 +223,10 @@ function destroyProposal(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.proposals.table.valid_until')">
+                <Column
+                    :header="t('ui.proposals.table.valid_until')"
+                    style="min-width: 120px"
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
                         <span
                             class="text-sm text-surface-600 dark:text-surface-300"
@@ -226,7 +238,7 @@ function destroyProposal(): void {
 
                 <Column :header="t('ui.proposals.table.actions')">
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <div class="flex items-center justify-end gap-2">
+                        <div class="flex items-center justify-center gap-2">
                             <Button
                                 v-if="data.status.value === 'draft'"
                                 severity="success"
@@ -414,6 +426,44 @@ function destroyProposal(): void {
                     </p>
                 </section>
             </div>
+
+            <section
+                v-if="proposalPendingDetail.status.value === 'accepted'"
+                class="grid gap-2"
+            >
+                <p
+                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                >
+                    {{ t('ui.proposals.detail.signatory_name') }}
+                </p>
+                <p
+                    class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                >
+                    {{
+                        proposalPendingDetail.finalized_metadata
+                            .accepted_by_name ?? ''
+                    }}
+                </p>
+            </section>
+
+            <section
+                v-if="proposalPendingDetail.status.value === 'declined'"
+                class="grid gap-2"
+            >
+                <p
+                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
+                >
+                    {{ t('ui.proposals.detail.refusal_reason') }}
+                </p>
+                <p
+                    class="text-sm leading-6 break-words text-surface-700 dark:text-surface-200"
+                >
+                    {{
+                        proposalPendingDetail.finalized_metadata
+                            .refusal_reason ?? ''
+                    }}
+                </p>
+            </section>
         </div>
     </Dialog>
 </template>

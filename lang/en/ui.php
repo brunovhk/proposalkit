@@ -308,6 +308,8 @@ return [
         'created' => 'Proposal created.',
         'deleted' => 'Proposal deleted.',
         'detail' => [
+            'refusal_reason' => 'Refusal reason',
+            'signatory_name' => 'Full name',
             'title' => 'Proposal details',
         ],
         'empty' => 'No proposals found.',
