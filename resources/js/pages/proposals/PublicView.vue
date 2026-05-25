@@ -253,7 +253,9 @@ function rejectProposal(): void {
                     <p class="text-sm text-surface-500 dark:text-surface-400">
                         {{ t('ui.proposals.total.title') }}
                     </p>
-                    <p class="text-4xl font-semibold text-green-300">
+                    <p
+                        class="text-4xl font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ proposal.total.formatted }}
                     </p>
                 </div>

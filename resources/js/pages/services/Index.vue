@@ -110,48 +110,67 @@ function destroyService(): void {
         </div>
 
         <div
-            class="overflow-hidden rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
+            class="overflow-x-auto overflow-y-hidden rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
         >
             <DataTable
                 :value="props.services.data"
                 data-key="id"
+                stripedRows
+                removableSort
                 :paginator="props.services.data.length > 10"
                 :rows="10"
                 table-style="min-width: 48rem"
             >
-                <Column field="name" :header="t('ui.services.table.name')">
+                <Column
+                    field="name"
+                    :header="t('ui.services.table.name')"
+                    sortable
+                    class="max-w-42 whitespace-nowrap"
+                >
                     <template #body="{ data }: { data: ServiceRecord }">
-                        <div class="min-w-0">
-                            <p
-                                class="truncate font-medium text-surface-950 dark:text-surface-0"
-                            >
-                                {{ data.name }}
-                            </p>
-                        </div>
-                    </template>
-                </Column>
-
-                <Column :header="t('ui.services.table.description')">
-                    <template #body="{ data }: { data: ServiceRecord }">
-                        <button
-                            type="button"
-                            class="line-clamp-2 max-w-xl text-left text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-300 dark:hover:text-surface-0"
+                        <span
+                            v-tooltip.top="data.name"
+                            class="block cursor-pointer truncate font-medium text-surface-950 hover:underline dark:text-surface-0"
                             @click="viewService(data)"
                         >
-                            {{ data.description ?? '' }}
-                        </button>
+                            {{ data.name }}
+                        </span>
                     </template>
                 </Column>
 
-                <Column :header="t('ui.services.table.price')">
+                <Column
+                    :header="t('ui.services.table.description')"
+                    class="max-w-80 whitespace-nowrap"
+                >
                     <template #body="{ data }: { data: ServiceRecord }">
-                        <span class="font-medium text-green-300">{{
-                            data.price.formatted
-                        }}</span>
+                        <p
+                            class="truncate text-left text-sm text-surface-600 dark:text-surface-300"
+                        >
+                            {{ data.description ?? '' }}
+                        </p>
                     </template>
                 </Column>
 
-                <Column :header="t('ui.services.table.type')">
+                <Column
+                    field="price.cents"
+                    :header="t('ui.services.table.price')"
+                    class="whitespace-nowrap"
+                    sortable
+                >
+                    <template #body="{ data }: { data: ServiceRecord }">
+                        <span
+                            class="font-medium text-green-500 dark:text-green-300"
+                            >{{ data.price.formatted }}</span
+                        >
+                    </template>
+                </Column>
+
+                <Column
+                    field="type.label"
+                    :header="t('ui.services.table.type')"
+                    class="w-12 whitespace-nowrap"
+                    sortable
+                >
                     <template #body="{ data }: { data: ServiceRecord }">
                         <Tag
                             :value="data.type.label"
@@ -165,7 +184,11 @@ function destroyService(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.services.table.actions')">
+                <Column
+                    :header="t('ui.services.table.actions')"
+                    body-class="text-right"
+                    class="w-42!"
+                >
                     <template #body="{ data }: { data: ServiceRecord }">
                         <div class="flex items-center justify-end gap-2">
                             <Button
@@ -215,7 +238,9 @@ function destroyService(): void {
 
     <Dialog
         v-model:visible="deleteDialogVisible"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="
             t('ui.services.confirm_delete.title', {
                 name: servicePendingDelete?.name ?? '',

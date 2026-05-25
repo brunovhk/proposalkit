@@ -164,28 +164,42 @@ function destroyProposal(): void {
         </div>
 
         <div
-            class="overflow-hidden rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
+            class="rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
         >
             <DataTable
                 :value="props.proposals.data"
                 data-key="id"
+                showGridlines
+                stripedRows
+                removableSort
                 :paginator="props.proposals.data.length > 10"
                 :rows="10"
                 tableStyle="min-width: 58rem"
             >
-                <Column field="title" :header="t('ui.proposals.table.title')">
+                <Column
+                    field="title"
+                    :header="t('ui.proposals.table.title')"
+                    class="max-w-48! md:max-w-64!"
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <p
-                            class="truncate font-medium text-surface-950 dark:text-surface-0"
+                        <span
+                            v-tooltip.top="data.title"
+                            class="block cursor-pointer truncate font-medium text-surface-950 hover:underline dark:text-surface-0"
+                            @click="requestDetail(data)"
                         >
                             {{ data.title }}
-                        </p>
+                        </span>
                     </template>
                 </Column>
 
-                <Column :header="t('ui.proposals.table.client')">
+                <Column
+                    field="client.name"
+                    :header="t('ui.proposals.table.client')"
+                    sortable
+                    class="max-w-42!"
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <div class="min-w-0">
+                        <div>
                             <p
                                 class="truncate text-sm font-medium text-surface-800 dark:text-surface-100"
                             >
@@ -201,8 +215,10 @@ function destroyProposal(): void {
                 </Column>
 
                 <Column
+                    field="status.label"
                     :header="t('ui.proposals.table.status')"
-                    style="max-width: 100px"
+                    class="w-12 whitespace-nowrap"
+                    sortable
                 >
                     <template #body="{ data }: { data: ProposalRecord }">
                         <div class="flex items-center justify-center">
@@ -215,17 +231,26 @@ function destroyProposal(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.proposals.table.total')">
+                <Column
+                    field="total.cents"
+                    :header="t('ui.proposals.table.total')"
+                    class="whitespace-nowrap"
+                    sortable
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <span class="font-medium text-green-300">
+                        <span
+                            class="font-medium text-green-500 dark:text-green-300"
+                        >
                             {{ data.total.formatted }}
                         </span>
                     </template>
                 </Column>
 
                 <Column
+                    field="valid_until.value"
                     :header="t('ui.proposals.table.valid_until')"
-                    style="min-width: 120px"
+                    class="max-w-28 whitespace-nowrap"
+                    sortable
                 >
                     <template #body="{ data }: { data: ProposalRecord }">
                         <span
@@ -236,9 +261,13 @@ function destroyProposal(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.proposals.table.actions')">
+                <Column
+                    :header="t('ui.proposals.table.actions')"
+                    body-class="text-right"
+                    class="w-42!"
+                >
                     <template #body="{ data }: { data: ProposalRecord }">
-                        <div class="flex items-center justify-center gap-2">
+                        <div class="flex items-center justify-end gap-1">
                             <Button
                                 v-if="data.status.value === 'draft'"
                                 severity="success"
@@ -313,7 +342,9 @@ function destroyProposal(): void {
 
     <Dialog
         v-model:visible="deleteDialogVisible"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="
             t('ui.proposals.confirm_delete.title', {
                 title: proposalPendingDelete?.title ?? '',
@@ -344,7 +375,9 @@ function destroyProposal(): void {
 
     <Dialog
         v-model:visible="detailDialogVisible"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="t('ui.proposals.detail.title')"
         class="mx-4 w-full max-w-lg"
     >
@@ -370,13 +403,11 @@ function destroyProposal(): void {
                         {{ t('ui.proposals.fields.client') }}
                     </p>
                     <p
-                        class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                        class="text-sm font-medium text-surface-950 dark:text-surface-0"
                     >
                         {{ proposalPendingDetail.client.name }}
                     </p>
-                    <p
-                        class="text-xs break-words text-surface-500 dark:text-surface-400"
-                    >
+                    <p class="text-xs text-surface-500 dark:text-surface-400">
                         {{ proposalPendingDetail.client.email }}
                     </p>
                 </section>
@@ -408,7 +439,9 @@ function destroyProposal(): void {
                     >
                         {{ t('ui.proposals.table.total') }}
                     </p>
-                    <p class="text-sm font-semibold text-green-300">
+                    <p
+                        class="text-sm font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ proposalPendingDetail.total.formatted }}
                     </p>
                 </section>
@@ -437,7 +470,7 @@ function destroyProposal(): void {
                     {{ t('ui.proposals.detail.signatory_name') }}
                 </p>
                 <p
-                    class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                    class="text-sm font-medium text-surface-950 dark:text-surface-0"
                 >
                     {{
                         proposalPendingDetail.finalized_metadata
@@ -456,7 +489,7 @@ function destroyProposal(): void {
                     {{ t('ui.proposals.detail.refusal_reason') }}
                 </p>
                 <p
-                    class="text-sm leading-6 break-words text-surface-700 dark:text-surface-200"
+                    class="text-sm leading-tight text-surface-700 dark:text-surface-200"
                 >
                     {{
                         proposalPendingDetail.finalized_metadata

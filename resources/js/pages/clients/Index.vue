@@ -104,37 +104,53 @@ function destroyClient(): void {
         </div>
 
         <div
-            class="overflow-hidden rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
+            class="rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
         >
             <DataTable
                 :value="props.clients.data"
                 data-key="id"
+                stripedRows
+                removableSort
                 :paginator="props.clients.data.length > 10"
                 :rows="10"
                 table-style="min-width: 52rem"
             >
-                <Column field="name" :header="t('ui.clients.table.name')">
+                <Column
+                    field="name"
+                    :header="t('ui.clients.table.name')"
+                    sortable
+                    class="max-w-50 md:max-w-50"
+                >
                     <template #body="{ data }: { data: ClientRecord }">
-                        <p
-                            class="truncate font-medium text-surface-950 dark:text-surface-0"
+                        <span
+                            v-tooltip.top="data.name"
+                            class="block cursor-pointer truncate font-medium text-surface-950 hover:underline dark:text-surface-0"
+                            @click="viewClient(data)"
                         >
                             {{ data.name }}
-                        </p>
+                        </span>
                     </template>
                 </Column>
 
-                <Column field="email" :header="t('ui.clients.table.email')">
+                <Column
+                    field="email"
+                    :header="t('ui.clients.table.email')"
+                    sortable
+                >
                     <template #body="{ data }: { data: ClientRecord }">
                         <a
                             :href="`mailto:${data.email}`"
-                            class="text-sm break-words text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-300 dark:hover:text-surface-0"
+                            class="wrap-break-words text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-300 dark:hover:text-surface-0"
                         >
                             {{ data.email }}
                         </a>
                     </template>
                 </Column>
 
-                <Column :header="t('ui.clients.table.tax_id')">
+                <Column
+                    :header="t('ui.clients.table.tax_id')"
+                    class="whitespace-nowrap"
+                >
                     <template #body="{ data }: { data: ClientRecord }">
                         <span
                             class="text-sm text-surface-600 dark:text-surface-300"
@@ -144,19 +160,25 @@ function destroyClient(): void {
                     </template>
                 </Column>
 
-                <Column :header="t('ui.clients.table.address')">
+                <Column
+                    :header="t('ui.clients.table.address')"
+                    class="max-w-48! md:max-w-64!"
+                >
                     <template #body="{ data }: { data: ClientRecord }">
-                        <button
-                            type="button"
-                            class="line-clamp-2 max-w-xl text-left text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-300 dark:hover:text-surface-0"
-                            @click="viewClient(data)"
+                        <p
+                            v-tooltip.top="data.address"
+                            class="truncate text-sm text-surface-600 dark:text-surface-300"
                         >
                             {{ data.address ?? '' }}
-                        </button>
+                        </p>
                     </template>
                 </Column>
 
-                <Column :header="t('ui.clients.table.actions')">
+                <Column
+                    :header="t('ui.clients.table.actions')"
+                    body-class="text-right"
+                    class="w-42!"
+                >
                     <template #body="{ data }: { data: ClientRecord }">
                         <div class="flex items-center justify-end gap-2">
                             <Button
@@ -206,7 +228,9 @@ function destroyClient(): void {
 
     <Dialog
         v-model:visible="deleteDialogVisible"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="
             t('ui.clients.confirm_delete.title', {
                 name: clientPendingDelete?.name ?? '',

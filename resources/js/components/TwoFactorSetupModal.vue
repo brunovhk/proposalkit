@@ -97,6 +97,7 @@ watch(
 <template>
     <Dialog
         v-model:visible="isOpen"
+        :dismissableMask="true"
         modal
         :draggable="false"
         class="w-[min(32rem,calc(100vw-2rem))]"

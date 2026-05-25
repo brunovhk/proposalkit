@@ -39,7 +39,9 @@ const visibleModel = computed({
 <template>
     <Dialog
         v-model:visible="visibleModel"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="t('ui.services.detail.title')"
         class="mx-4 w-full max-w-lg"
     >
@@ -77,7 +79,9 @@ const visibleModel = computed({
                     >
                         {{ t('ui.services.fields.price') }}
                     </p>
-                    <p class="text-sm font-semibold text-green-300">
+                    <p
+                        class="text-sm font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ service.price.formatted }}
                     </p>
                 </section>
