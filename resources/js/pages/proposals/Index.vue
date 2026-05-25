@@ -1,55 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { ExternalLink, Eye, Pencil, Plus, Send, Trash2 } from '@lucide/vue';
+import { Plus } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
+import ProposalDeleteDialog from '@/components/proposals/ProposalDeleteDialog.vue';
+import ProposalDetailDialog from '@/components/proposals/ProposalDetailDialog.vue';
+import ProposalTable from '@/components/proposals/ProposalTable.vue';
 import { useTranslations } from '@/composables/useTranslations';
-
-type ProposalStatusValue =
-    | 'draft'
-    | 'sent'
-    | 'viewed'
-    | 'accepted'
-    | 'declined';
-type ProposalStatusSeverity =
-    | 'secondary'
-    | 'info'
-    | 'success'
-    | 'warn'
-    | 'danger';
-
-type ProposalRecord = {
-    id: number;
-    uuid: string;
-    title: string;
-    client: {
-        id: number;
-        name: string;
-        email: string;
-    };
-    status: {
-        value: ProposalStatusValue;
-        label: string;
-    };
-    valid_until: {
-        value: string | null;
-        formatted: string | null;
-    };
-    total: {
-        cents: number;
-        formatted: string;
-    };
-    finalized_metadata: {
-        accepted_by_name: string | null;
-        refusal_reason: string | null;
-    };
-    urls: {
-        edit: string;
-        destroy: string;
-        send: string;
-        public: string;
-    };
-};
+import type { ProposalRecord } from '@/types/proposals';
 
 type Props = {
     proposals: {
@@ -84,14 +42,6 @@ const detailDialogVisible = computed({
     },
 });
 
-const statusSeverity: Record<ProposalStatusValue, ProposalStatusSeverity> = {
-    draft: 'secondary',
-    sent: 'info',
-    viewed: 'warn',
-    accepted: 'success',
-    declined: 'danger',
-};
-
 watchEffect(() => {
     setLayoutProps({
         breadcrumbs: [
@@ -111,22 +61,10 @@ function requestDetail(proposal: ProposalRecord): void {
     proposalPendingDetail.value = proposal;
 }
 
-function canViewPublicLink(status: ProposalStatusValue): boolean {
-    return ['sent', 'viewed'].includes(status);
-}
-
-function canViewInternalDetails(status: ProposalStatusValue): boolean {
-    return ['accepted', 'declined'].includes(status);
-}
-
 function sendProposal(proposal: ProposalRecord): void {
     router.post(proposal.urls.send, undefined, {
         preserveScroll: true,
     });
-}
-
-function publicProposalUrl(proposal: ProposalRecord): string {
-    return proposal.urls.public;
 }
 
 function destroyProposal(): void {
@@ -163,340 +101,22 @@ function destroyProposal(): void {
             </Link>
         </div>
 
-        <div
-            class="rounded-md border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
-        >
-            <DataTable
-                :value="props.proposals.data"
-                data-key="id"
-                showGridlines
-                stripedRows
-                removableSort
-                :paginator="props.proposals.data.length > 10"
-                :rows="10"
-                tableStyle="min-width: 58rem"
-            >
-                <Column
-                    field="title"
-                    :header="t('ui.proposals.table.title')"
-                    class="max-w-48! md:max-w-64!"
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <span
-                            v-tooltip.top="data.title"
-                            class="block cursor-pointer truncate font-medium text-surface-950 hover:underline dark:text-surface-0"
-                            @click="requestDetail(data)"
-                        >
-                            {{ data.title }}
-                        </span>
-                    </template>
-                </Column>
-
-                <Column
-                    field="client.name"
-                    :header="t('ui.proposals.table.client')"
-                    sortable
-                    class="max-w-42!"
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <div>
-                            <p
-                                class="truncate text-sm font-medium text-surface-800 dark:text-surface-100"
-                            >
-                                {{ data.client.name }}
-                            </p>
-                            <p
-                                class="truncate text-xs text-surface-500 dark:text-surface-400"
-                            >
-                                {{ data.client.email }}
-                            </p>
-                        </div>
-                    </template>
-                </Column>
-
-                <Column
-                    field="status.label"
-                    :header="t('ui.proposals.table.status')"
-                    class="w-12 whitespace-nowrap"
-                    sortable
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <div class="flex items-center justify-center">
-                            <Tag
-                                :value="data.status.label"
-                                :severity="statusSeverity[data.status.value]"
-                                rounded
-                            />
-                        </div>
-                    </template>
-                </Column>
-
-                <Column
-                    field="total.cents"
-                    :header="t('ui.proposals.table.total')"
-                    class="whitespace-nowrap"
-                    sortable
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <span
-                            class="font-medium text-green-500 dark:text-green-300"
-                        >
-                            {{ data.total.formatted }}
-                        </span>
-                    </template>
-                </Column>
-
-                <Column
-                    field="valid_until.value"
-                    :header="t('ui.proposals.table.valid_until')"
-                    class="max-w-28 whitespace-nowrap"
-                    sortable
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <span
-                            class="text-sm text-surface-600 dark:text-surface-300"
-                        >
-                            {{ data.valid_until.formatted ?? '' }}
-                        </span>
-                    </template>
-                </Column>
-
-                <Column
-                    :header="t('ui.proposals.table.actions')"
-                    body-class="text-right"
-                    class="w-42!"
-                >
-                    <template #body="{ data }: { data: ProposalRecord }">
-                        <div class="flex items-center justify-end gap-1">
-                            <Button
-                                v-if="data.status.value === 'draft'"
-                                severity="success"
-                                variant="text"
-                                :aria-label="t('ui.proposals.actions.send')"
-                                @click="sendProposal(data)"
-                            >
-                                <Send class="size-4" />
-                            </Button>
-                            <Link
-                                v-if="data.status.value === 'draft'"
-                                :href="data.urls.edit"
-                            >
-                                <Button
-                                    severity="secondary"
-                                    variant="text"
-                                    :aria-label="t('ui.actions.edit')"
-                                >
-                                    <Pencil class="size-4" />
-                                </Button>
-                            </Link>
-                            <Button
-                                v-if="data.status.value === 'draft'"
-                                severity="danger"
-                                variant="text"
-                                :aria-label="t('ui.proposals.actions.delete')"
-                                @click="requestDelete(data)"
-                            >
-                                <Trash2 class="size-4" />
-                            </Button>
-                            <a
-                                v-if="canViewPublicLink(data.status.value)"
-                                :href="publicProposalUrl(data)"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <Button
-                                    severity="secondary"
-                                    variant="text"
-                                    :aria-label="
-                                        t('ui.proposals.actions.view_public')
-                                    "
-                                >
-                                    <ExternalLink class="size-4" />
-                                </Button>
-                            </a>
-                            <Button
-                                v-if="canViewInternalDetails(data.status.value)"
-                                severity="secondary"
-                                variant="text"
-                                :aria-label="
-                                    t('ui.proposals.actions.view_details')
-                                "
-                                @click="requestDetail(data)"
-                            >
-                                <Eye class="size-4" />
-                            </Button>
-                        </div>
-                    </template>
-                </Column>
-
-                <template #empty>
-                    <div
-                        class="py-10 text-center text-sm text-surface-500 dark:text-surface-400"
-                    >
-                        {{ t('ui.proposals.empty') }}
-                    </div>
-                </template>
-            </DataTable>
-        </div>
+        <ProposalTable
+            :proposals="props.proposals.data"
+            @send="sendProposal"
+            @request-delete="requestDelete"
+            @request-detail="requestDetail"
+        />
     </div>
 
-    <Dialog
+    <ProposalDeleteDialog
         v-model:visible="deleteDialogVisible"
-        :dismissableMask="true"
-        modal
-        :draggable="false"
-        :header="
-            t('ui.proposals.confirm_delete.title', {
-                title: proposalPendingDelete?.title ?? '',
-            })
-        "
-        class="mx-4 w-full max-w-md"
-    >
-        <p class="text-sm text-surface-600 dark:text-surface-300">
-            {{ t('ui.proposals.confirm_delete.body') }}
-        </p>
+        :proposal="proposalPendingDelete"
+        @confirm="destroyProposal"
+    />
 
-        <template #footer>
-            <div class="flex justify-end gap-2">
-                <Button
-                    severity="secondary"
-                    variant="text"
-                    @click="deleteDialogVisible = false"
-                >
-                    {{ t('ui.actions.cancel') }}
-                </Button>
-                <Button severity="danger" @click="destroyProposal">
-                    <Trash2 class="size-4" />
-                    <span>{{ t('ui.actions.delete') }}</span>
-                </Button>
-            </div>
-        </template>
-    </Dialog>
-
-    <Dialog
+    <ProposalDetailDialog
         v-model:visible="detailDialogVisible"
-        :dismissableMask="true"
-        modal
-        :draggable="false"
-        :header="t('ui.proposals.detail.title')"
-        class="mx-4 w-full max-w-lg"
-    >
-        <div v-if="proposalPendingDetail" class="grid gap-5">
-            <section class="grid gap-2">
-                <p
-                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                >
-                    {{ t('ui.proposals.fields.title') }}
-                </p>
-                <h2
-                    class="text-xl font-semibold text-surface-950 dark:text-surface-0"
-                >
-                    {{ proposalPendingDetail.title }}
-                </h2>
-            </section>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <section class="grid gap-2">
-                    <p
-                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                    >
-                        {{ t('ui.proposals.fields.client') }}
-                    </p>
-                    <p
-                        class="text-sm font-medium text-surface-950 dark:text-surface-0"
-                    >
-                        {{ proposalPendingDetail.client.name }}
-                    </p>
-                    <p class="text-xs text-surface-500 dark:text-surface-400">
-                        {{ proposalPendingDetail.client.email }}
-                    </p>
-                </section>
-
-                <section class="grid gap-2">
-                    <p
-                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                    >
-                        {{ t('ui.proposals.table.status') }}
-                    </p>
-                    <div>
-                        <Tag
-                            :value="proposalPendingDetail.status.label"
-                            :severity="
-                                statusSeverity[
-                                    proposalPendingDetail.status.value
-                                ]
-                            "
-                            rounded
-                        />
-                    </div>
-                </section>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <section class="grid gap-2">
-                    <p
-                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                    >
-                        {{ t('ui.proposals.table.total') }}
-                    </p>
-                    <p
-                        class="text-sm font-semibold text-green-500 dark:text-green-300"
-                    >
-                        {{ proposalPendingDetail.total.formatted }}
-                    </p>
-                </section>
-
-                <section class="grid gap-2">
-                    <p
-                        class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                    >
-                        {{ t('ui.proposals.table.valid_until') }}
-                    </p>
-                    <p
-                        class="text-sm font-medium text-surface-950 dark:text-surface-0"
-                    >
-                        {{ proposalPendingDetail.valid_until.formatted ?? '' }}
-                    </p>
-                </section>
-            </div>
-
-            <section
-                v-if="proposalPendingDetail.status.value === 'accepted'"
-                class="grid gap-2"
-            >
-                <p
-                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                >
-                    {{ t('ui.proposals.detail.signatory_name') }}
-                </p>
-                <p
-                    class="text-sm font-medium text-surface-950 dark:text-surface-0"
-                >
-                    {{
-                        proposalPendingDetail.finalized_metadata
-                            .accepted_by_name ?? ''
-                    }}
-                </p>
-            </section>
-
-            <section
-                v-if="proposalPendingDetail.status.value === 'declined'"
-                class="grid gap-2"
-            >
-                <p
-                    class="text-xs font-medium tracking-wide text-surface-500 uppercase dark:text-surface-400"
-                >
-                    {{ t('ui.proposals.detail.refusal_reason') }}
-                </p>
-                <p
-                    class="text-sm leading-tight text-surface-700 dark:text-surface-200"
-                >
-                    {{
-                        proposalPendingDetail.finalized_metadata
-                            .refusal_reason ?? ''
-                    }}
-                </p>
-            </section>
-        </div>
-    </Dialog>
+        :proposal="proposalPendingDetail"
+    />
 </template>
