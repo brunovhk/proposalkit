@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Proposals;
 
 use App\Models\Proposal;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Streams a generated proposal PDF from private storage for a valid signed public request.
@@ -16,19 +17,25 @@ class DownloadPublicProposalPdfAction
     /**
      * Stream the generated PDF or return a not-found response when it has not been created yet.
      */
-    public function execute(Proposal $proposal): StreamedResponse
+    public function execute(Proposal $proposal): Response
     {
         $path = $this->resolvePdfPath($proposal);
+        $filename = "{$proposal->uuid}.pdf";
 
         if ($path === null) {
+            if (config('app.live_demo_enabled') === true) {
+                return $this->inlinePdfResponse(
+                    $this->generatePdfContents($proposal),
+                    $filename,
+                );
+            }
+
             abort(404);
         }
 
-        return Storage::disk('proposals')->response(
-            $path,
-            "{$proposal->uuid}.pdf",
-            ['Content-Type' => 'application/pdf'],
-        );
+        $pdfContents = Storage::disk('proposals')->get($path);
+
+        return $this->inlinePdfResponse((string) $pdfContents, $filename);
     }
 
     /**
@@ -51,5 +58,24 @@ class DownloadPublicProposalPdfAction
         }
 
         return null;
+    }
+
+    private function generatePdfContents(Proposal $proposal): string
+    {
+        $proposal->loadMissing(['tenant', 'client', 'items']);
+
+        return Pdf::loadView('proposals.pdf', [
+            'proposal' => $proposal,
+        ])
+            ->setPaper('a4')
+            ->output();
+    }
+
+    private function inlinePdfResponse(string $pdfContents, string $filename): Response
+    {
+        return response($pdfContents, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => sprintf('inline; filename="%s"', $filename),
+        ]);
     }
 }

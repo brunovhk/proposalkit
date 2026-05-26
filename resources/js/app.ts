@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/vue3';
+import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import PrimeVue from 'primevue/config';
@@ -16,6 +17,54 @@ import { initializeFlashToast } from '@/lib/flashToast';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+const ProposalKitPreset = definePreset(Aura, {
+    semantic: {
+        primary: {
+            50: '{cyan.50}',
+            100: '{cyan.100}',
+            200: '{cyan.200}',
+            300: '{cyan.300}',
+            400: '{cyan.400}',
+            500: '{cyan.500}',
+            600: '{cyan.600}',
+            700: '{cyan.700}',
+            800: '{cyan.800}',
+            900: '{cyan.900}',
+            950: '{cyan.950}',
+        },
+        colorScheme: {
+            light: {
+                primary: {
+                    color: '{cyan.600}',
+                    inverseColor: '#ffffff',
+                    hoverColor: '{cyan.700}',
+                    activeColor: '{cyan.800}',
+                },
+                highlight: {
+                    background: '{cyan.50}',
+                    focusBackground: '{cyan.100}',
+                    color: '{cyan.700}',
+                    focusColor: '{cyan.800}',
+                },
+            },
+            dark: {
+                primary: {
+                    color: '{cyan.300}',
+                    inverseColor: '{slate.950}',
+                    hoverColor: '{cyan.200}',
+                    activeColor: '{cyan.100}',
+                },
+                highlight: {
+                    background: 'rgba(103, 232, 249, 0.16)',
+                    focusBackground: 'rgba(103, 232, 249, 0.24)',
+                    color: '{cyan.100}',
+                    focusColor: '{cyan.50}',
+                },
+            },
+        },
+    },
+});
+
 initializeTheme();
 
 createInertiaApp({
@@ -27,7 +76,9 @@ createInertiaApp({
         ),
     layout: (name) => {
         switch (true) {
-            case name === 'Welcome':
+            case name === 'marketing/Index':
+                return null;
+            case name.startsWith('errors/'):
                 return null;
             case name === 'proposals/PublicView':
                 return PublicLayout;
@@ -46,7 +97,7 @@ createInertiaApp({
             .use(PrimeVue, {
                 ripple: true,
                 theme: {
-                    preset: Aura,
+                    preset: ProposalKitPreset,
                     options: {
                         cssLayer: {
                             name: 'primevue',
@@ -64,6 +115,6 @@ createInertiaApp({
         vueApp.mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#06b6d4',
     },
 });

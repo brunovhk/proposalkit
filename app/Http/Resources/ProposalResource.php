@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Proposal;
+use App\Models\ProposalEvent;
 use App\Models\ProposalItem;
 use App\Services\PublicProposalUrlGenerator;
 use Illuminate\Http\Request;
@@ -53,6 +54,7 @@ class ProposalResource extends JsonResource
             ],
             'client' => ClientResource::make($this->whenLoaded('client')),
             'items' => ProposalItemResource::collection($this->whenLoaded('items')),
+            'finalized_metadata' => $this->finalizedMetadata($proposal),
             'created_at' => $proposal->created_at?->toAtomString(),
             'updated_at' => $proposal->updated_at?->toAtomString(),
             'urls' => [
@@ -77,5 +79,43 @@ class ProposalResource extends JsonResource
         return (int) $items->sum(
             static fn (ProposalItem $item): int => $item->price * $item->quantity,
         );
+    }
+
+    /**
+     * Return lifecycle metadata displayed by the finalized proposal detail modal.
+     *
+     * @return array{accepted_by_name: string|null, refusal_reason: string|null}
+     */
+    private function finalizedMetadata(Proposal $proposal): array
+    {
+        /** @var Collection<int, ProposalEvent> $events */
+        $events = $proposal->relationLoaded('events')
+            ? $proposal->getRelation('events')
+            : collect();
+
+        $acceptedEvent = $events->first(
+            static fn (ProposalEvent $event): bool => $event->type === 'accepted',
+        );
+        $rejectedEvent = $events->first(
+            static fn (ProposalEvent $event): bool => $event->type === 'rejected',
+        );
+
+        return [
+            'accepted_by_name' => $this->stringPayloadValue($acceptedEvent, 'typed_name'),
+            'refusal_reason' => $this->stringPayloadValue($rejectedEvent, 'reason'),
+        ];
+    }
+
+    private function stringPayloadValue(?ProposalEvent $event, string $key): ?string
+    {
+        $payload = $event?->payload;
+
+        if (! is_array($payload)) {
+            return null;
+        }
+
+        $value = $payload[$key] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }

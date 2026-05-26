@@ -6,14 +6,16 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {
@@ -26,7 +28,11 @@ class PasswordResetTest extends TestCase
     {
         $response = $this->get(route('password.request'));
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('auth/ForgotPassword')
+                ->where('status', null));
     }
 
     public function test_reset_password_link_can_be_requested(): void
@@ -51,7 +57,12 @@ class PasswordResetTest extends TestCase
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
             $response = $this->get(route('password.reset', $notification->token));
 
-            $response->assertOk();
+            $response
+                ->assertOk()
+                ->assertInertia(fn (Assert $page): Assert => $page
+                    ->component('auth/ResetPassword')
+                    ->where('email', null)
+                    ->where('token', $notification->token));
 
             return true;
         });
@@ -77,6 +88,8 @@ class PasswordResetTest extends TestCase
                 ->assertSessionHasNoErrors()
                 ->assertRedirect(route('login'));
 
+            $this->assertTrue(Hash::check('password', $user->refresh()->password));
+
             return true;
         });
     }
@@ -93,5 +106,6 @@ class PasswordResetTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('email');
+        $this->assertFalse(Hash::check('newpassword123', $user->refresh()->password));
     }
 }

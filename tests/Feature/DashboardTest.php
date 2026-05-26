@@ -10,13 +10,13 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Cache\Repository as CacheRepositoryContract;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {
@@ -40,7 +40,7 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $response->assertInertia(
             fn (AssertableInertia $page): AssertableInertia => $page
-                ->component('Dashboard/Index')
+                ->component('dashboard/Index')
                 ->has('metrics')
                 ->has('filters'),
         );

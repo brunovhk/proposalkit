@@ -11,7 +11,7 @@ use App\Models\ProposalItem;
 use App\Models\Tenant;
 use App\Models\User;
 use App\States\Proposal\Draft;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class ProposalArchitectureTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

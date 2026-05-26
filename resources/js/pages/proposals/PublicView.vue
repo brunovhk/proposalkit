@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Check, Download, X } from 'lucide-vue-next';
+import { Check, Download, X } from '@lucide/vue';
 import { computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -253,7 +253,9 @@ function rejectProposal(): void {
                     <p class="text-sm text-surface-500 dark:text-surface-400">
                         {{ t('ui.proposals.total.title') }}
                     </p>
-                    <p class="text-4xl font-semibold text-green-300">
+                    <p
+                        class="text-4xl font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ proposal.total.formatted }}
                     </p>
                 </div>

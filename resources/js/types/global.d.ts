@@ -22,6 +22,7 @@ declare module '@inertiajs/core' {
                 success?: string | null;
             };
             locale: string;
+            live_demo_enabled: boolean;
             translations: Record<string, unknown>;
             sidebarOpen: boolean;
             [key: string]: unknown;

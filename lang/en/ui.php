@@ -85,19 +85,32 @@ return [
     'messages' => [
         'error_title' => 'Something went wrong.',
         'success_title' => 'Success',
+        'warning_title' => 'Warning',
     ],
     'errors' => [
         '403' => [
-            'body' => 'This proposal link is invalid, expired, or has been changed.',
-            'title' => 'Proposal link unavailable',
-        ],
-        '410' => [
-            'body' => 'This proposal has already been finalized and is no longer available for modifications.',
-            'title' => 'Proposal already finalized',
+            'body' => 'Sorry, you are forbidden from accessing this page.',
+            'title' => '403: Forbidden',
         ],
         '404' => [
-            'body' => 'The page or proposal you requested could not be found.',
-            'title' => 'Page not found',
+            'body' => 'Sorry, the page you are looking for could not be found.',
+            'title' => '404: Page Not Found',
+        ],
+        '405' => [
+            'body' => 'Sorry, this request method is not allowed for this page.',
+            'title' => '405: Method Not Allowed',
+        ],
+        '410' => [
+            'body' => 'This proposal has already been finalized and is no longer available.',
+            'title' => '410: Gone',
+        ],
+        '500' => [
+            'body' => 'Whoops, something went wrong on our servers.',
+            'title' => '500: Server Error',
+        ],
+        '503' => [
+            'body' => 'Sorry, we are doing some maintenance. Please check back soon.',
+            'title' => '503: Service Unavailable',
         ],
         'return_home' => 'Return home',
     ],
@@ -105,16 +118,49 @@ return [
         'appearance' => 'Appearance',
         'clients' => 'Clients',
         'dashboard' => 'Dashboard',
-        'documentation' => 'Documentation',
         'navigation_menu' => 'Navigation menu',
         'platform' => 'Platform',
         'profile' => 'Profile',
         'proposals' => 'Proposals',
-        'repository' => 'Repository',
         'search' => 'Search',
         'security' => 'Security',
         'services' => 'Services',
         'settings' => 'Settings',
+    ],
+    'landing' => [
+        'actions' => [
+            'back_to_home' => 'Back to homepage',
+            'live_demo' => 'Live Demo',
+            'sign_in' => 'Sign In',
+        ],
+        'brand' => 'ProposalKit',
+        'eyebrow' => 'Commercial proposal infrastructure',
+        'head' => 'ProposalKit',
+        'pillars' => [
+            'access' => [
+                'description' => 'HMAC-signed recipient routing pairs secure proposal links with an immutable append-only audit trail.',
+                'title' => 'Cryptographic Access',
+            ],
+            'label' => 'Product architectural pillars',
+            'lifecycle' => [
+                'description' => 'Spatie Model States power class-based transition guardrails for every proposal state change.',
+                'title' => 'Strict Lifecycle Engine',
+            ],
+            'tenancy' => [
+                'description' => 'Tenant-aware data boundaries rely on global scopes and explicit isolation rules throughout the domain.',
+                'title' => 'Multi-Tenant Architecture',
+            ],
+        ],
+        'stack' => [
+            'label' => 'Technology stack',
+            'laravel' => 'Laravel 13',
+            'php' => 'PHP 8.4',
+            'redis' => 'Redis',
+            'state_machine' => 'Spatie State Machine',
+            'vue' => 'Vue 3',
+        ],
+        'subtitle' => 'A multi-tenant platform for generating, tracking, and securing commercial proposals.',
+        'title' => 'ProposalKit',
     ],
     'dashboard' => [
         'charts' => [
@@ -252,6 +298,7 @@ return [
             'delete' => 'Delete proposal',
             'save' => 'Save proposal',
             'send' => 'Send proposal',
+            'view_details' => 'View proposal details',
             'view_public' => 'View public proposal',
         ],
         'confirm_delete' => [
@@ -260,6 +307,11 @@ return [
         ],
         'created' => 'Proposal created.',
         'deleted' => 'Proposal deleted.',
+        'detail' => [
+            'refusal_reason' => 'Refusal reason',
+            'signatory_name' => 'Full name',
+            'title' => 'Proposal details',
+        ],
         'empty' => 'No proposals found.',
         'emails' => [
             'accepted' => [

@@ -33,7 +33,9 @@ const visibleModel = computed({
 <template>
     <Dialog
         v-model:visible="visibleModel"
+        :dismissableMask="true"
         modal
+        :draggable="false"
         :header="t('ui.clients.detail.title')"
         class="mx-4 w-full max-w-lg"
     >
@@ -59,7 +61,7 @@ const visibleModel = computed({
                         {{ t('ui.clients.fields.email') }}
                     </p>
                     <p
-                        class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                        class="text-sm font-medium break-all text-surface-950 dark:text-surface-0"
                     >
                         {{ client.email }}
                     </p>
@@ -72,7 +74,7 @@ const visibleModel = computed({
                         {{ t('ui.clients.fields.tax_id') }}
                     </p>
                     <p
-                        class="text-sm font-medium break-words text-surface-950 dark:text-surface-0"
+                        class="text-sm font-medium text-surface-950 dark:text-surface-0"
                     >
                         {{ client.tax_id ?? '' }}
                     </p>

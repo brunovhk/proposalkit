@@ -34,6 +34,7 @@ watchEffect(() => {
                     required
                     autocomplete="current-password"
                     autofocus
+                    :input-props="{ tabindex: 1 }"
                     :invalid="Boolean(errors.password)"
                     :feedback="false"
                     toggle-mask
@@ -45,6 +46,7 @@ watchEffect(() => {
 
             <div class="flex items-center pt-1">
                 <Button
+                    type="submit"
                     fluid
                     :disabled="processing"
                     :loading="processing"

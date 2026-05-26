@@ -1,11 +1,9 @@
 import {
-    BookOpen,
     BriefcaseBusiness,
     FileText,
-    FolderGit2,
     LayoutGrid,
     UsersRound,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
@@ -15,7 +13,6 @@ import type { NavItem } from '@/types';
 
 type UseNavigationReturn = {
     mainNavItems: ComputedRef<NavItem[]>;
-    footerNavItems: ComputedRef<NavItem[]>;
 };
 
 export function useNavigation(): UseNavigationReturn {
@@ -56,21 +53,7 @@ export function useNavigation(): UseNavigationReturn {
         ];
     });
 
-    const footerNavItems = computed<NavItem[]>(() => [
-        {
-            title: t('ui.nav.repository'),
-            href: 'https://github.com/laravel/vue-starter-kit',
-            icon: FolderGit2,
-        },
-        {
-            title: t('ui.nav.documentation'),
-            href: 'https://laravel.com/docs/starter-kits#vue',
-            icon: BookOpen,
-        },
-    ]);
-
     return {
         mainNavItems,
-        footerNavItems,
     };
 }

@@ -20,9 +20,7 @@ use App\States\Proposal\Sent;
 use App\States\Proposal\Viewed;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
@@ -34,7 +32,7 @@ final class DemoSeeder extends Seeder
 
     private const int CLIENT_COUNT = 30;
 
-    private const int PROPOSAL_COUNT = 80;
+    private const int PROPOSAL_COUNT = 200;
 
     /**
      * Seed the demo tenant, replacing only prior Acme Studio sandbox data.
@@ -130,48 +128,15 @@ final class DemoSeeder extends Seeder
      */
     private function createClients(Tenant $tenant): array
     {
-        $companyNames = [
-            'Northstar Clinics',
-            'BrightLedger Finance',
-            'Atlas Roasters',
-            'Cobalt Labs',
-            'Juniper Events',
-            'Pioneer Legal',
-            'Summit Travel Co',
-            'UrbanNest Realty',
-            'Nimbus Learning',
-            'Harbor Dental Group',
-            'Luma Fitness',
-            'Evergreen Foods',
-            'Vector Supply',
-            'Oakline Architecture',
-            'Beacon HR',
-            'Quartz Security',
-            'Fieldstone Builders',
-            'Mosaic Apparel',
-            'Silverline Logistics',
-            'Bluebird Hospitality',
-            'Signal Commerce',
-            'Opal Wellness',
-            'Meridian Solar',
-            'Hearth & Table',
-            'Pulse Recruiting',
-            'Keystone Advisors',
-            'Aperture Media',
-            'Riverbend Education',
-            'Forge Industrial',
-            'Clearwater Insurance',
-        ];
-
         $clients = [];
 
-        foreach ($companyNames as $index => $name) {
+        for ($index = 0; $index < $this->clientCount(); $index++) {
             $clients[] = Client::query()->create([
                 'tenant_id' => $tenant->id,
-                'name' => $name,
-                'email' => sprintf('contact+%02d@%s.test', $index + 1, Str::slug($name)),
-                'tax_id' => sprintf('%02d.%03d.%03d/0001-%02d', 10 + $index, 100 + $index, 700 + $index, 20 + $index),
-                'address' => sprintf('%d Market Street, Suite %d', 100 + ($index * 17), 200 + $index),
+                'name' => fake()->company(),
+                'email' => fake()->unique()->companyEmail(),
+                'tax_id' => fake()->regexify('[A-Z]{2}[0-9]{9}'),
+                'address' => fake()->address(),
             ]);
         }
 
@@ -184,42 +149,55 @@ final class DemoSeeder extends Seeder
      */
     private function createProposals(Tenant $tenant, User $demoUser, array $clients, array $services): void
     {
-        $now = CarbonImmutable::parse(Date::now()->toDateTimeString(), Date::now()->getTimezone());
+        $clientCount = count($clients);
+        $itemsToInsert = [];
+        $eventsToInsert = [];
 
-        for ($index = 0; $index < self::PROPOSAL_COUNT; $index++) {
-            $statusClass = $this->statusForIndex($index);
-            $createdAt = $now
-                ->subDays(180 - (int) floor($index * 170 / (self::PROPOSAL_COUNT - 1)))
-                ->subHours($index % 9);
+        for ($index = 0; $index < $this->proposalCount(); $index++) {
+            $client = $clients[$index % $clientCount];
 
-            $client = $clients[$index % self::CLIENT_COUNT];
+            $proposal = Proposal::factory()
+                ->for($tenant)
+                ->for($client)
+                ->create([
+                    'title' => sprintf('%s growth proposal', $client->name),
+                ]);
 
-            $proposal = Proposal::query()->create([
-                'tenant_id' => $tenant->id,
-                'client_id' => $client->id,
-                'title' => sprintf('%s growth proposal', $client->name),
-                'status' => $statusClass,
-                'valid_until' => $createdAt->addDays(45 + ($index % 20))->toDateString(),
-            ]);
+            /** @var class-string<ProposalState> $statusClass */
+            $statusClass = $proposal->status::class;
+            $createdAt = CarbonImmutable::parse((string) $proposal->created_at);
 
-            $proposal->timestamps = false;
-            $proposal->forceFill([
-                'created_at' => $createdAt,
-                'updated_at' => $this->updatedAtForStatus($statusClass, $createdAt, $index),
-            ])->save();
-            $proposal->timestamps = true;
-
-            $this->createProposalItems($proposal, $services, $index);
-            $this->createProposalEvents($proposal, $demoUser, $statusClass, $createdAt, $index);
+            $itemCount = $this->createProposalItems($proposal, $services, $index, $itemsToInsert);
+            $this->createProposalEvents($proposal, $demoUser, $statusClass, $createdAt, $index, $itemCount, $eventsToInsert);
         }
+
+        if ($itemsToInsert !== []) {
+            ProposalItem::query()->insert($itemsToInsert);
+        }
+
+        if ($eventsToInsert !== []) {
+            ProposalEvent::query()->insert($eventsToInsert);
+        }
+    }
+
+    private function clientCount(): int
+    {
+        return max(1, (int) config('demo.client_count', self::CLIENT_COUNT));
+    }
+
+    private function proposalCount(): int
+    {
+        return max(1, (int) config('demo.proposal_count', self::PROPOSAL_COUNT));
     }
 
     /**
      * @param  list<Service>  $services
+     * @param  list<array{proposal_id: int, name: string, price: int, type: string, quantity: int, created_at: string, updated_at: string}>  $itemsToInsert
      */
-    private function createProposalItems(Proposal $proposal, array $services, int $proposalIndex): void
+    private function createProposalItems(Proposal $proposal, array $services, int $proposalIndex, array &$itemsToInsert): int
     {
         $itemCount = 2 + ($proposalIndex % 3);
+        $timestamp = CarbonImmutable::parse((string) $proposal->created_at)->toDateTimeString();
 
         for ($itemIndex = 0; $itemIndex < $itemCount; $itemIndex++) {
             $service = $services[($proposalIndex + $itemIndex) % count($services)];
@@ -227,18 +205,25 @@ final class DemoSeeder extends Seeder
                 ? 8 + (($proposalIndex + $itemIndex) % 32)
                 : 1;
 
-            ProposalItem::query()->create([
+            $itemsToInsert[] = [
                 'proposal_id' => $proposal->id,
                 'name' => $service->name,
                 'price' => $service->price,
-                'type' => $service->type,
+                'type' => $service->type->value,
                 'quantity' => $quantity,
-            ]);
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
         }
+
+        return $itemCount;
     }
 
     /**
      * @param  class-string<ProposalState>  $statusClass
+     * @param  list<array{proposal_id: int, type: string, payload: string, actor_type: class-string<User>|null, actor_id: int|null, ip: string|null, user_agent: string|null, occurred_at: string}>  $eventsToInsert
+     *
+     * @throws \JsonException
      */
     private function createProposalEvents(
         Proposal $proposal,
@@ -246,15 +231,18 @@ final class DemoSeeder extends Seeder
         string $statusClass,
         CarbonImmutable $createdAt,
         int $proposalIndex,
+        int $itemCount,
+        array &$eventsToInsert,
     ): void {
         $this->createEvent(
+            eventsToInsert: $eventsToInsert,
             proposal: $proposal,
             type: 'created',
             occurredAt: $createdAt,
             payload: [
                 'title' => $proposal->title,
                 'client_id' => $proposal->client_id,
-                'item_count' => $proposal->items()->count(),
+                'item_count' => $itemCount,
             ],
             actor: $demoUser,
         );
@@ -263,16 +251,17 @@ final class DemoSeeder extends Seeder
             return;
         }
 
-        $sentAt = $createdAt->addDays(1 + ($proposalIndex % 5));
-        $this->createTransitionEvent($proposal, Draft::$name, Sent::$name, $sentAt, $demoUser);
+        $sentAt = $createdAt->addHours(2 + ($proposalIndex % 6));
+        $this->createTransitionEvent($eventsToInsert, $proposal, Draft::$name, Sent::$name, $sentAt, $demoUser);
 
         if ($statusClass === Sent::class) {
             return;
         }
 
-        $viewedAt = $sentAt->addDays(1 + ($proposalIndex % 4))->addHours($proposalIndex % 6);
-        $this->createTransitionEvent($proposal, Sent::$name, Viewed::$name, $viewedAt, $demoUser);
+        $viewedAt = $sentAt->addHours(2 + ($proposalIndex % 6));
+        $this->createTransitionEvent($eventsToInsert, $proposal, Sent::$name, Viewed::$name, $viewedAt, $demoUser);
         $this->createEvent(
+            eventsToInsert: $eventsToInsert,
             proposal: $proposal,
             type: 'viewed',
             occurredAt: $viewedAt->addMinutes(3),
@@ -286,11 +275,12 @@ final class DemoSeeder extends Seeder
             return;
         }
 
-        $closedAt = $viewedAt->addDays(2 + ($proposalIndex % 18))->addHours($proposalIndex % 5);
+        $closedAt = $viewedAt->addHours(2 + ($proposalIndex % 18));
 
         if ($statusClass === Accepted::class) {
-            $this->createTransitionEvent($proposal, Viewed::$name, Accepted::$name, $closedAt, $demoUser);
+            $this->createTransitionEvent($eventsToInsert, $proposal, Viewed::$name, Accepted::$name, $closedAt, $demoUser);
             $this->createEvent(
+                eventsToInsert: $eventsToInsert,
                 proposal: $proposal,
                 type: 'accepted',
                 occurredAt: $closedAt->addMinutes(5),
@@ -306,8 +296,9 @@ final class DemoSeeder extends Seeder
         }
 
         if ($statusClass === Declined::class) {
-            $this->createTransitionEvent($proposal, Viewed::$name, Declined::$name, $closedAt, $demoUser);
+            $this->createTransitionEvent($eventsToInsert, $proposal, Viewed::$name, Declined::$name, $closedAt, $demoUser);
             $this->createEvent(
+                eventsToInsert: $eventsToInsert,
                 proposal: $proposal,
                 type: 'rejected',
                 occurredAt: $closedAt->addMinutes(5),
@@ -320,7 +311,13 @@ final class DemoSeeder extends Seeder
         }
     }
 
+    /**
+     * @param  list<array{proposal_id: int, type: string, payload: string, actor_type: class-string<User>|null, actor_id: int|null, ip: string|null, user_agent: string|null, occurred_at: string}>  $eventsToInsert
+     *
+     * @throws \JsonException
+     */
     private function createTransitionEvent(
+        array &$eventsToInsert,
         Proposal $proposal,
         string $from,
         string $to,
@@ -328,6 +325,7 @@ final class DemoSeeder extends Seeder
         User $actor,
     ): void {
         $this->createEvent(
+            eventsToInsert: $eventsToInsert,
             proposal: $proposal,
             type: 'transitioned',
             occurredAt: $occurredAt,
@@ -340,52 +338,28 @@ final class DemoSeeder extends Seeder
     }
 
     /**
+     * @param  list<array{proposal_id: int, type: string, payload: string, actor_type: class-string<User>|null, actor_id: int|null, ip: string|null, user_agent: string|null, occurred_at: string}>  $eventsToInsert
      * @param  array<string, mixed>  $payload
+     *
+     * @throws \JsonException
      */
     private function createEvent(
+        array &$eventsToInsert,
         Proposal $proposal,
         string $type,
         CarbonImmutable $occurredAt,
         array $payload,
         ?User $actor = null,
     ): void {
-        ProposalEvent::query()->create([
+        $eventsToInsert[] = [
             'proposal_id' => $proposal->id,
             'type' => $type,
-            'payload' => $payload,
+            'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
             'actor_type' => $actor instanceof User ? User::class : null,
             'actor_id' => $actor?->id,
             'ip' => $actor instanceof User ? null : sprintf('198.51.100.%d', 10 + ($proposal->id % 100)),
             'user_agent' => $actor instanceof User ? null : 'Mozilla/5.0 ProposalKit Demo Browser',
-            'occurred_at' => $occurredAt,
-        ]);
-    }
-
-    /**
-     * @return class-string<ProposalState>
-     */
-    private function statusForIndex(int $index): string
-    {
-        return match (true) {
-            $index < 12 => Draft::class,
-            $index < 30 => Sent::class,
-            $index < 46 => Viewed::class,
-            $index < 70 => Accepted::class,
-            default => Declined::class,
-        };
-    }
-
-    /**
-     * @param  class-string<ProposalState>  $statusClass
-     */
-    private function updatedAtForStatus(string $statusClass, CarbonImmutable $createdAt, int $proposalIndex): CarbonImmutable
-    {
-        return match ($statusClass) {
-            Draft::class => $createdAt->addHours(2 + ($proposalIndex % 12)),
-            Sent::class => $createdAt->addDays(1 + ($proposalIndex % 5)),
-            Viewed::class => $createdAt->addDays(3 + ($proposalIndex % 9)),
-            Accepted::class, Declined::class => $createdAt->addDays(7 + ($proposalIndex % 18)),
-            default => $createdAt,
-        };
+            'occurred_at' => $occurredAt->toDateTimeString(),
+        ];
     }
 }

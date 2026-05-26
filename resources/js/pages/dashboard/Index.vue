@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { CalendarDays, RotateCcw } from 'lucide-vue-next';
+import { CalendarDays, RotateCcw } from '@lucide/vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useTranslations } from '@/composables/useTranslations';

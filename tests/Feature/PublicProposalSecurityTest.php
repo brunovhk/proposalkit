@@ -18,17 +18,19 @@ use App\States\Proposal\Declined;
 use App\States\Proposal\Draft;
 use App\States\Proposal\Sent;
 use App\States\Proposal\Viewed;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
+use Mockery;
 use Tests\TestCase;
 
 class PublicProposalSecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_signed_public_proposal_can_be_viewed_without_authentication(): void
     {
@@ -226,9 +228,10 @@ class PublicProposalSecurityTest extends TestCase
         $response = $this
             ->get($this->pdfUrl($proposal))
             ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "inline; filename=\"{$proposal->uuid}.pdf\"");
 
-        $this->assertStringContainsString('%PDF-1.4 test content', $response->streamedContent());
+        $this->assertStringContainsString('%PDF-1.4 test content', (string) $response->getContent());
     }
 
     public function test_signed_pdf_download_returns_not_found_when_file_is_missing(): void
@@ -244,6 +247,62 @@ class PublicProposalSecurityTest extends TestCase
         $this
             ->get($this->pdfUrl($proposal))
             ->assertNotFound();
+    }
+
+    public function test_signed_pdf_download_generates_missing_file_on_live_demo(): void
+    {
+        Storage::fake('proposals');
+        config(['app.live_demo_enabled' => true]);
+        $pdf = new class extends \Barryvdh\DomPDF\PDF
+        {
+            /**
+             * @var string|array<int, float>|null
+             */
+            public string|array|null $paper = null;
+
+            public function __construct() {}
+
+            /**
+             * @param  string|array<int, float>  $paper
+             */
+            public function setPaper(string|array $paper, string $orientation = 'portrait'): self
+            {
+                $this->paper = $paper;
+
+                return $this;
+            }
+
+            /**
+             * @param  array<string, int>  $options
+             */
+            public function output(array $options = []): string
+            {
+                return '%PDF-1.4 fake live demo content';
+            }
+        };
+
+        $proposal = Proposal::factory()
+            ->sent()
+            ->create([
+                'valid_until' => now()->addDays(10),
+            ]);
+
+        Pdf::shouldReceive('loadView')
+            ->once()
+            ->with('proposals.pdf', Mockery::on(
+                static fn (array $data): bool => ($data['proposal'] ?? null) instanceof Proposal
+                    && $data['proposal']->is($proposal),
+            ))
+            ->andReturn($pdf);
+
+        $response = $this
+            ->get($this->pdfUrl($proposal))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "inline; filename=\"{$proposal->uuid}.pdf\"");
+
+        $this->assertSame('a4', $pdf->paper);
+        $this->assertStringStartsWith('%PDF-', (string) $response->getContent());
     }
 
     public function test_pdf_download_blocks_tampered_signed_requests(): void

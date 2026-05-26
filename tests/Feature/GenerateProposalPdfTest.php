@@ -12,14 +12,17 @@ use App\Models\ProposalItem;
 use App\Models\Tenant;
 use App\Models\User;
 use App\States\Proposal\Draft;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use ReflectionProperty;
 use Tests\TestCase;
 
 class GenerateProposalPdfTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_pdf_generation_job_is_dispatched_when_proposal_is_sent(): void
     {
@@ -38,12 +41,51 @@ class GenerateProposalPdfTest extends TestCase
             ->post(route('proposals.send', $proposal))
             ->assertRedirect('/proposals');
 
-        Queue::assertPushed(GenerateProposalPdfJob::class);
+        Queue::assertPushed(
+            GenerateProposalPdfJob::class,
+            static function (GenerateProposalPdfJob $job) use ($proposal): bool {
+                $proposalId = new ReflectionProperty($job, 'proposalId');
+
+                return $proposalId->getValue($job) === $proposal->id;
+            },
+        );
+
+        $this->assertDatabaseHas('proposals', [
+            'id' => $proposal->id,
+            'status' => 'sent',
+        ]);
     }
 
     public function test_pdf_generation_job_writes_private_pdf_snapshot(): void
     {
         Storage::fake('proposals');
+        $pdf = new class extends \Barryvdh\DomPDF\PDF
+        {
+            /**
+             * @var string|array<int, float>|null
+             */
+            public string|array|null $paper = null;
+
+            public function __construct() {}
+
+            /**
+             * @param  string|array<int, float>  $paper
+             */
+            public function setPaper(string|array $paper, string $orientation = 'portrait'): self
+            {
+                $this->paper = $paper;
+
+                return $this;
+            }
+
+            /**
+             * @param  array<string, int>  $options
+             */
+            public function output(array $options = []): string
+            {
+                return '%PDF-1.4 fake test content';
+            }
+        };
 
         $tenant = Tenant::factory()->create([
             'name' => 'ProposalKit Studio',
@@ -79,8 +121,17 @@ class GenerateProposalPdfTest extends TestCase
                 'quantity' => 4,
             ]);
 
+        Pdf::shouldReceive('loadView')
+            ->once()
+            ->with('proposals.pdf', Mockery::on(
+                static fn (array $data): bool => ($data['proposal'] ?? null) instanceof Proposal
+                    && $data['proposal']->is($proposal),
+            ))
+            ->andReturn($pdf);
+
         new GenerateProposalPdfJob($proposal->id)->handle();
 
+        $this->assertSame('a4', $pdf->paper);
         Storage::disk('proposals')->assertExists("{$proposal->uuid}.pdf");
 
         $this->assertDatabaseHas('proposals', [

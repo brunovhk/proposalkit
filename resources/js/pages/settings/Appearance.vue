@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
-import { Monitor, Moon, Sun } from 'lucide-vue-next';
-import type { LucideIcon } from 'lucide-vue-next';
+import { Monitor, Moon, Sun } from '@lucide/vue';
+import type { LucideIcon } from '@lucide/vue';
 import { computed, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { useAppearance } from '@/composables/useAppearance';

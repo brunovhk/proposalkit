@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, setLayoutProps, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Save, Trash2 } from '@lucide/vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -362,7 +362,9 @@ function submit(): void {
                     >
                         {{ t('ui.proposals.total.title') }}
                     </p>
-                    <p class="mt-2 text-3xl font-semibold text-green-300">
+                    <p
+                        class="mt-2 text-3xl font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ totalFormatted }}
                     </p>
                     <p
@@ -571,7 +573,9 @@ function submit(): void {
                     <p class="text-sm text-surface-500 dark:text-surface-400">
                         {{ t('ui.proposals.total.title') }}
                     </p>
-                    <p class="text-2xl font-semibold text-green-300">
+                    <p
+                        class="text-2xl font-semibold text-green-500 dark:text-green-300"
+                    >
                         {{ totalFormatted }}
                     </p>
                 </div>

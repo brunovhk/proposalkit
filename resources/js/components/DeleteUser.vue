@@ -42,6 +42,7 @@ async function focusPasswordInput(): Promise<void> {
             </Button>
             <Dialog
                 v-model:visible="visible"
+                :dismissableMask="true"
                 modal
                 :header="t('ui.settings.delete_user.confirm_title')"
                 :draggable="false"

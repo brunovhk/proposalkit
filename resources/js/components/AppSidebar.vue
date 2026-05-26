@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { useNavigation } from '@/composables/useNavigation';
 import { dashboard } from '@/routes';
 
-const { mainNavItems, footerNavItems } = useNavigation();
+const { mainNavItems } = useNavigation();
 </script>
 
 <template>
@@ -27,7 +26,6 @@ const { mainNavItems, footerNavItems } = useNavigation();
         <div
             class="space-y-3 border-t border-surface-200 p-3 dark:border-surface-700"
         >
-            <NavFooter :items="footerNavItems" />
             <NavUser />
         </div>
     </aside>
