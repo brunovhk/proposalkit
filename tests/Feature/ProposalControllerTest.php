@@ -16,14 +16,14 @@ use App\States\Proposal\Accepted;
 use App\States\Proposal\Declined;
 use App\States\Proposal\Draft;
 use App\States\Proposal\Sent;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ProposalControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_index_lists_only_proposals_from_the_active_tenant(): void
     {
@@ -172,6 +172,12 @@ class ProposalControllerTest extends TestCase
         $service = Service::factory()->for($tenant)->create([
             'name' => 'Proposal Strategy',
         ]);
+        Client::factory()->for(Tenant::factory())->create([
+            'name' => 'Hidden Client',
+        ]);
+        Service::factory()->for(Tenant::factory())->create([
+            'name' => 'Hidden Service',
+        ]);
         $proposal = Proposal::factory()
             ->for($tenant)
             ->for($client)
@@ -196,6 +202,8 @@ class ProposalControllerTest extends TestCase
                 ->component('proposals/Form')
                 ->where('proposal', null)
                 ->has('clients.data', 1)
+                ->where('clients.data.0.id', $client->id)
+                ->has('services.data', 1)
                 ->where('services.data.0.id', $service->id)
                 ->where('services.data.0.name', 'Proposal Strategy'));
 
@@ -268,6 +276,53 @@ class ProposalControllerTest extends TestCase
         ]);
     }
 
+    public function test_authenticated_user_can_delete_own_draft_proposal(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $proposal = Proposal::factory()
+            ->for($tenant)
+            ->create([
+                'status' => Draft::class,
+                'title' => 'Disposable Draft',
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->delete("/proposals/{$proposal->id}")
+            ->assertRedirect('/proposals')
+            ->assertSessionHas('success', __('ui.proposals.deleted'));
+
+        $this->assertDatabaseMissing('proposals', [
+            'id' => $proposal->id,
+            'title' => 'Disposable Draft',
+        ]);
+    }
+
+    public function test_authenticated_user_cannot_delete_another_tenants_proposal(): void
+    {
+        $tenantA = Tenant::factory()->create();
+        $tenantB = Tenant::factory()->create();
+
+        $userA = User::factory()->for($tenantA)->create();
+        $proposalB = Proposal::factory()
+            ->for($tenantB)
+            ->create([
+                'status' => Draft::class,
+                'title' => 'Foreign Draft',
+            ]);
+
+        $this
+            ->actingAs($userA)
+            ->delete("/proposals/{$proposalB->id}")
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('proposals', [
+            'id' => $proposalB->id,
+            'title' => 'Foreign Draft',
+        ]);
+    }
+
     public function test_non_draft_proposals_cannot_be_edited_updated_or_deleted(): void
     {
         $tenant = Tenant::factory()->create();
@@ -302,6 +357,11 @@ class ProposalControllerTest extends TestCase
             $this
                 ->actingAs($user)
                 ->delete("/proposals/{$proposal->id}")
+                ->assertForbidden();
+
+            $this
+                ->actingAs($user)
+                ->post(route('proposals.send', $proposal))
                 ->assertForbidden();
 
             $this->assertDatabaseHas('proposals', [

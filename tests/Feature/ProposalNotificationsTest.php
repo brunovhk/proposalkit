@@ -17,14 +17,15 @@ use App\States\Proposal\Accepted;
 use App\States\Proposal\Declined;
 use App\States\Proposal\Draft;
 use App\States\Proposal\Sent;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ProposalNotificationsTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_proposal_sent_mail_is_queued_when_proposal_is_marked_as_sent(): void
     {
@@ -100,19 +101,27 @@ class ProposalNotificationsTest extends TestCase
         $owner = User::factory()->for($tenant)->create([
             'email' => 'owner@example.com',
         ]);
-        $client = Client::factory()->for($tenant)->create();
+        $client = Client::factory()->for($tenant)->create([
+            'name' => 'Acme Buyer',
+        ]);
         $proposal = Proposal::factory()
             ->sent()
             ->for($tenant)
             ->for($client)
-            ->create();
+            ->create([
+                'title' => 'Accepted Growth Plan',
+            ]);
 
         resolve(TransitionProposalAction::class)->execute($proposal, Accepted::class);
 
         Mail::assertQueued(
             ProposalAccepted::class,
             static fn (ProposalAccepted $mail): bool => $mail->hasTo($owner->email)
-                && $mail->proposal->is($proposal),
+                && $mail->proposal->is($proposal)
+                && Str::contains($mail->render(), [
+                    'Acme Buyer',
+                    'Accepted Growth Plan',
+                ]),
         );
     }
 
@@ -124,19 +133,27 @@ class ProposalNotificationsTest extends TestCase
         $owner = User::factory()->for($tenant)->create([
             'email' => 'owner@example.com',
         ]);
-        $client = Client::factory()->for($tenant)->create();
+        $client = Client::factory()->for($tenant)->create([
+            'name' => 'Budget Committee',
+        ]);
         $proposal = Proposal::factory()
             ->sent()
             ->for($tenant)
             ->for($client)
-            ->create();
+            ->create([
+                'title' => 'Declined Launch Plan',
+            ]);
 
         resolve(TransitionProposalAction::class)->execute($proposal, Declined::class);
 
         Mail::assertQueued(
             ProposalDeclined::class,
             static fn (ProposalDeclined $mail): bool => $mail->hasTo($owner->email)
-                && $mail->proposal->is($proposal),
+                && $mail->proposal->is($proposal)
+                && Str::contains($mail->render(), [
+                    'Budget Committee',
+                    'Declined Launch Plan',
+                ]),
         );
     }
 }

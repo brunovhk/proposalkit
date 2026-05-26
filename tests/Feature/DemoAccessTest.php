@@ -8,25 +8,22 @@ use App\Enums\SystemUserEmail;
 use App\Models\Client;
 use App\Models\Tenant;
 use App\Models\User;
-use Database\Seeders\DatabaseSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 final class DemoAccessTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private const string DEMO_WARNING_MESSAGE = 'Create, Edit, and Delete operations are disabled in the Live Demo.';
 
     public function test_public_demo_login_authenticates_seeded_demo_user(): void
     {
-        $this->seed(DatabaseSeeder::class);
-
-        $demoUser = User::query()
-            ->where('email', SystemUserEmail::Demo->value)
-            ->firstOrFail();
+        $demoUser = User::factory()->create([
+            'email' => SystemUserEmail::Demo->value,
+        ]);
 
         $this
             ->post('/demo/login')
@@ -170,6 +167,10 @@ final class DemoAccessTest extends TestCase
         $this
             ->actingAs($demoUser)
             ->get('/clients')
-            ->assertOk();
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->component('clients/Index')
+                ->has('clients.data', 1)
+                ->where('clients.data.0.name', 'Readable Sandbox Client'));
     }
 }

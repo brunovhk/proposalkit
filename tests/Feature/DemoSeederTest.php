@@ -12,7 +12,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 final class DemoSeederTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function tearDown(): void
     {
@@ -32,6 +32,10 @@ final class DemoSeederTest extends TestCase
     public function test_demo_seeder_is_idempotent_and_rebuilds_only_the_demo_tenant(): void
     {
         Date::setTestNow('2026-05-21 12:00:00');
+        config([
+            'demo.client_count' => 3,
+            'demo.proposal_count' => 12,
+        ]);
 
         $otherTenant = Tenant::factory()->create(['name' => 'Other Tenant']);
         $otherUser = User::factory()->for($otherTenant)->create(['email' => 'owner@example.test']);
@@ -70,10 +74,10 @@ final class DemoSeederTest extends TestCase
         $this->assertSame($originalDemoUser->id, $demoUser->id);
         $this->assertTrue(Hash::check('demo', $demoUser->password));
         $this->assertSame(1, User::query()->where('email', 'demo@proposalkit.test')->count());
-        $this->assertSame(30, Client::query()->whereBelongsTo($tenant)->count());
+        $this->assertSame(3, Client::query()->whereBelongsTo($tenant)->count());
         $this->assertSame(10, Service::query()->whereBelongsTo($tenant)->count());
-        $this->assertSame(200, Proposal::query()->whereBelongsTo($tenant)->count());
-        $this->assertGreaterThan(200, ProposalEvent::query()->whereIn('proposal_id', $proposalIds)->count());
+        $this->assertSame(12, Proposal::query()->whereBelongsTo($tenant)->count());
+        $this->assertGreaterThan(12, ProposalEvent::query()->whereIn('proposal_id', $proposalIds)->count());
         $this->assertDatabaseHas('users', [
             'id' => $otherUser->id,
             'tenant_id' => $otherTenant->id,
