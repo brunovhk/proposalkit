@@ -1,0 +1,122 @@
+services:
+    app:
+        image: proposalkit-app:development
+        build:
+            context: .
+            dockerfile: docker/common/php-fpm/Dockerfile
+            target: development
+            args:
+                XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        user: "${UID}:${GID}"
+        volumes:
+            - .:/var/www/html
+        expose:
+            - "9000"
+        networks:
+            - proposalkit-dev
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+
+    web:
+        image: nginx:1.27-alpine
+        ports:
+            - "8080:80"
+        volumes:
+            - .:/var/www/html:ro
+            - ./docker/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        networks:
+            - proposalkit-dev
+        depends_on:
+            app:
+                condition: service_started
+
+    node:
+        build:
+            context: .
+            dockerfile: docker/development/node/Dockerfile
+        volumes:
+            - .:/var/www/html
+        ports:
+            - "5173:5173"
+        networks:
+            - proposalkit-dev
+        depends_on:
+            app:
+                condition: service_started
+
+    queue:
+        build:
+            context: .
+            dockerfile: docker/common/php-fpm/Dockerfile
+            target: development
+            args:
+                XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        image: proposalkit-app:development
+        command: php artisan queue:work --verbose --tries=3 --timeout=90
+        user: "${UID}:${GID}"
+        restart: unless-stopped
+        volumes:
+            - .:/var/www/html
+        networks:
+            - proposalkit-dev
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+
+    db:
+        image: mysql:8.0
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - mysql-data:/var/lib/mysql
+            - ./docker/development/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        networks:
+            - proposalkit-dev
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-p${DB_PASSWORD}",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis-data:/data
+        networks:
+            - proposalkit-dev
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+networks:
+    proposalkit-dev:
+
+volumes:
+    mysql-data:
+    redis-data:
