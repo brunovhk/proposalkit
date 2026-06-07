@@ -18,11 +18,13 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: testing
+          MYSQL_DATABASE: proposalkit_testing
+          MYSQL_USER: laravel
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: secret
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -u root -psecret" --health-interval=10s --health-timeout=5s --health-retries=3
 
       redis:
         image: redis:7.0
@@ -39,7 +41,7 @@ jobs:
         with:
           php-version: '8.4'
           # Only listing non-default or required native extensions to speed up setup
-          extensions: pdo_mysql, redis, zip
+          extensions: pdo_mysql, redis, zip, intl, pcntl
           tools: composer:v2
 
       - name: Get Composer Cache Directory
@@ -89,7 +91,7 @@ jobs:
           vendor/bin/rector process --dry-run
 
       - name: Static Analysis
-        run: vendor/bin/phpstan analyse --error-format=github
+        run: vendor/bin/phpstan analyse --error-format=github --memory-limit=512M
 
       - name: Run Tests
         run: php artisan test
