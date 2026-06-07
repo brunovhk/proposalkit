@@ -6,33 +6,60 @@ namespace Database\Seeders;
 
 use App\Models\Tenant;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
  * Seeds the default tenant-backed development account.
  */
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        $tenant = Tenant::factory()->create([
-            'name' => 'Acme Studio',
-            'slug' => 'acme-studio',
-        ]);
+        $this->seedDemoAccount();
 
-        User::factory()->for($tenant)->create([
-            'name' => 'Acme Demo',
-            'email' => 'demo@proposalkit.test',
-            'password' => Hash::make('demo'),
-        ]);
+        if ($this->isProductionEnvironment()) {
+            $this->call([
+                DemoLiveSeeder::class,
+            ]);
 
-        $this->call([
-            DemoSeeder::class,
-        ]);
+            return;
+        }
+
+        if ($this->isDevelopmentEnvironment()) {
+            $this->call([
+                DemoSeeder::class,
+            ]);
+        }
+    }
+
+    private function seedDemoAccount(): void
+    {
+        $tenant = Tenant::query()->updateOrCreate(
+            ['slug' => 'acme-studio'],
+            ['name' => 'Acme Studio'],
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'demo@proposalkit.test'],
+            [
+                'tenant_id' => $tenant->id,
+                'name' => 'Acme Demo',
+                'password' => Hash::make('demo'),
+            ],
+        );
+    }
+
+    private function isProductionEnvironment(): bool
+    {
+        return config('app.env') === 'production';
+    }
+
+    private function isDevelopmentEnvironment(): bool
+    {
+        return in_array(config('app.env'), ['local', 'testing'], true);
     }
 }
