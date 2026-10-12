@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Proposals;
 
-use App\Jobs\GenerateProposalPdfJob;
+use App\Jobs\GenerateProposalPdf;
 use App\Mail\ProposalSent;
 use App\Models\Proposal;
 use App\States\Proposal\Sent;
@@ -26,7 +26,7 @@ class SendProposal
     {
         $sentProposal = $this->transitionProposal->execute($proposal, Sent::class);
 
-        dispatch(new GenerateProposalPdfJob($sentProposal->id));
+        dispatch(new GenerateProposalPdf($sentProposal->id));
 
         $sentProposal->loadMissing(['client', 'items', 'tenant']);
 

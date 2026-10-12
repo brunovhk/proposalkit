@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Renders and stores the immutable PDF snapshot for a sent proposal.
  */
-class GenerateProposalPdfJob implements ShouldQueue
+class GenerateProposalPdf implements ShouldQueue
 {
     use Queueable;
 
