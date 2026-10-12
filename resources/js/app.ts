@@ -15,7 +15,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 // PrimeVue
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'ProposalKit';
 
 const ProposalKitPreset = definePreset(Aura, {
     semantic: {
