@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Client;
+use App\Models\Proposal;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -122,6 +123,22 @@ class ClientManagementTest extends TestCase
             'id' => $clientB->id,
             'name' => 'Protected Client',
         ]);
+    }
+
+    public function test_deleting_a_client_soft_deletes_it_and_keeps_proposal_history(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->for($tenant)->create();
+        $this->actingAs($user);
+
+        $client = Client::factory()->for($tenant)->create(['name' => 'Archived Client']);
+        $proposal = Proposal::factory()->for($tenant)->create(['client_id' => $client->id]);
+
+        $this->delete("/clients/{$client->id}")->assertRedirect('/clients');
+
+        $this->assertSoftDeleted('clients', ['id' => $client->id]);
+        $this->assertNull(Client::query()->find($client->id));
+        $this->assertSame('Archived Client', $proposal->refresh()->client->name);
     }
 
     /**
