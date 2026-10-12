@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\ServiceType;
-use App\Jobs\GenerateProposalPdfJob;
+use App\Jobs\GenerateProposalPdf;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
@@ -42,8 +42,8 @@ class GenerateProposalPdfTest extends TestCase
             ->assertRedirect('/proposals');
 
         Queue::assertPushed(
-            GenerateProposalPdfJob::class,
-            static function (GenerateProposalPdfJob $job) use ($proposal): bool {
+            GenerateProposalPdf::class,
+            static function (GenerateProposalPdf $job) use ($proposal): bool {
                 $proposalId = new ReflectionProperty($job, 'proposalId');
 
                 return $proposalId->getValue($job) === $proposal->id;
@@ -129,7 +129,7 @@ class GenerateProposalPdfTest extends TestCase
             ))
             ->andReturn($pdf);
 
-        new GenerateProposalPdfJob($proposal->id)->handle();
+        new GenerateProposalPdf($proposal->id)->handle();
 
         $this->assertSame('a4', $pdf->paper);
         Storage::disk('proposals')->assertExists("{$proposal->uuid}.pdf");

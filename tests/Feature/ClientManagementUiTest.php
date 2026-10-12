@@ -124,7 +124,7 @@ class ClientManagementUiTest extends TestCase
             ->assertRedirect('/clients')
             ->assertSessionHas('success', __('ui.clients.deleted'));
 
-        $this->assertDatabaseMissing('clients', [
+        $this->assertSoftDeleted('clients', [
             'id' => $client->id,
         ]);
     }

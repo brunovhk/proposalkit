@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * Represents a tenant-owned customer record used when preparing commercial proposals.
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $email
  * @property string|null $tax_id
  * @property string|null $address
+ * @property Carbon|null $deleted_at
  */
 #[Fillable([
     'tenant_id',
@@ -34,6 +37,8 @@ class Client extends Model
 
     /** @use HasFactory<ClientFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * Get the tenant that owns the client.
