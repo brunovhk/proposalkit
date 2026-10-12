@@ -1,8 +1,22 @@
 # ProposalKit
 
+[![CI](https://github.com/brunovhk/proposalkit/actions/workflows/ci.yml/badge.svg)](https://github.com/brunovhk/proposalkit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777bb4.svg)
+
 ProposalKit is a Laravel 13 and Vue 3 SaaS platform for building, sending, tracking, and digitally accepting commercial proposals inside tenant-isolated workspaces.
 
 ProposalKit is developed with a strict focus on data integrity, explicit multi-tenant boundaries, and immutable logs. The architecture isolates commercial documents, enforces cryptographic protections against client-side tampering, and tracks all lifecycle state transitions with structural evidence variables.
+
+**Live demo:** <https://proposalkit.brunovhk.dev>
+
+The demo signs you in with one click from the landing page and runs against fictional data. It is read-only: create, edit, and delete operations are blocked for the demo account.
+
+## Screenshots
+
+![Dashboard with pipeline analytics, monthly won value, and lifecycle distribution](docs/images/dashboard.png)
+
+![Proposals list with lifecycle status, client, total value, and validity window](docs/images/proposals.png)
 
 ## Features
 
@@ -36,6 +50,8 @@ ProposalKit is developed with a strict focus on data integrity, explicit multi-t
 - MySQL 8
 - Redis
 
+Docker and Docker Compose v2 can replace all of the above. See [Installation & Environments](#installation--environments).
+
 ## Architecture Highlights
 
 ### Tenant Isolation
@@ -66,17 +82,24 @@ The backend targets PHP 8.4 to keep the application aligned with the Laravel 13 
 
 Generated proposal PDFs are stored outside the public web root and streamed through signed public routes. This keeps document access governed by the same token, signature, and lifecycle policies as the public proposal interface.
 
-## Getting Started
+## Installation & Environments
 
-Install PHP dependencies:
+ProposalKit supports three setups. Pick the one that fits your goal:
+
+| Setup | Best for | Services |
+| --- | --- | --- |
+| [Native](#1-localhost-deployment-native) | Fast local iteration | Your own PHP, MySQL, Redis, Node |
+| [Docker (development)](#2-localhost-deployment-docker-development) | Reproducible local stack, no host toolchain | `compose.yaml` |
+| [Docker (production)](#3-production-deployment-docker-architecture) | Hardened, immutable deployment | `compose.prod.yaml` |
+
+### 1. Localhost Deployment (Native)
+
+**Prerequisites:** PHP 8.4+ (with `pdo_mysql`, `redis`, `gd`, `intl`, `zip`, `pcntl`), Composer 2, Node.js 22+ with npm, MySQL 8, and Redis.
+
+Install dependencies:
 
 ```bash
 composer install
-```
-
-Install Node dependencies. Use `npm ci` for lockfile-exact installs, or `npm install` during dependency work:
-
-```bash
 npm ci
 ```
 
@@ -87,36 +110,165 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Configure the database and Redis connection values in `.env`, then build the database:
+Create an empty MySQL database and a user with access to it, using your native tooling:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE proposalkit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Then set the connection values in `.env` (`DB_*` and `REDIS_*`) and build the schema with demo data:
 
 ```bash
 php artisan migrate:fresh --seed
-```
-
-Generate Wayfinder routes:
-
-```bash
 php artisan wayfinder:generate
 ```
 
-Build frontend assets:
+Start the application, queue worker, and Vite development server together:
 
 ```bash
-npm run build
+composer dev
 ```
 
-## Development
-
-Run the Laravel application server:
+Or run them in separate terminals:
 
 ```bash
 php artisan serve
+php artisan queue:listen --tries=1
+npm run dev
 ```
 
-In a separate terminal, run the Vite development server:
+The app is available at <http://localhost:8000>.
+
+### 2. Localhost Deployment (Docker Development)
+
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2. No local PHP, Node, MySQL, or Redis is required.
+
+The development stack in `compose.yaml` runs `app` (PHP-FPM with Xdebug), `web` (Nginx), `node` (Vite), `queue` (worker), `db` (MySQL 8), and `redis`. The project directory is bind-mounted into the containers, so code changes apply immediately.
+
+Create the environment file. Set `UID` and `GID` to your own values (`id -u`, `id -g`) to avoid file permission issues on bind mounts:
 
 ```bash
-npm run dev
+cp .env.development.example .env
+```
+
+Build the images and install PHP dependencies first, because the project is mounted from the host and the Vite plugin needs `vendor/`:
+
+```bash
+docker compose build
+docker compose run --rm app composer install
+```
+
+Start the stack, then generate the key and build the database:
+
+```bash
+docker compose up -d
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate:fresh --seed
+```
+
+| Service | URL |
+| --- | --- |
+| Application | <http://localhost:8080> |
+| Vite dev server (HMR) | <http://localhost:5173> |
+| MySQL / Redis (host access, bound to `127.0.0.1` only) | `localhost:3306` / `localhost:6379` |
+
+**Vite and HMR.** Frontend tooling is fully isolated in the `node` container. It runs `npm ci` and `npm run dev -- --host 0.0.0.0` on startup, and exposes Hot Module Replacement on port `5173`, so no Node installation is needed on the host. Follow its output with:
+
+```bash
+docker compose logs -f node
+```
+
+**Running tools inside the runtime container.** Use `docker compose exec app` for everything PHP:
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app composer test
+docker compose exec app ./vendor/bin/phpstan analyse
+docker compose exec app php artisan test
+```
+
+All containers that write to the project directory run as your own user (`UID` and `GID` from `.env`), so generated files such as `node_modules/` stay owned by you. If an earlier run left root-owned files behind, reclaim them once:
+
+```bash
+sudo chown -R "$(id -u):$(id -g)" node_modules public resources/js storage bootstrap/cache
+```
+
+If MySQL or Redis already run on your machine, `docker compose up` fails with `address already in use`. Pick other host ports in `.env` (for example `DB_FORWARD_PORT=3307` and `REDIS_FORWARD_PORT=6380`) and start the stack again. The containers keep talking to each other on the default ports, so nothing else changes.
+
+Stop the stack with `docker compose down`. Add `-v` to also remove the database and Redis volumes.
+
+### 3. Production Deployment (Docker Architecture)
+
+`compose.prod.yaml` defines an isolated, self-contained stack built from a single multi-stage `docker/common/php-fpm/Dockerfile`:
+
+| Service | Image target | Role |
+| --- | --- | --- |
+| `app` | `production` | PHP-FPM with OPcache and JIT, running as `www-data` |
+| `web` | `web-production` | Nginx serving static assets and proxying PHP to `app:9000` |
+| `queue` | `production` | `php artisan queue:work` |
+| `db` | `mysql:8.0` | Persistent database volume |
+| `redis` | `redis:7-alpine` | Password-protected cache, session, and queue backend |
+
+```mermaid
+flowchart LR
+    user([Browser]) -->|HTTPS| proxy[Reverse proxy<br/>TLS termination]
+    proxy -->|"HTTP + X-Forwarded-Proto/Ssl"| web
+
+    subgraph net["proposalkit-prod (isolated network, no published ports)"]
+        web["web<br/>Nginx + static assets"] -->|FastCGI :9000| app["app<br/>PHP-FPM"]
+        queue["queue<br/>queue:work"]
+        app --> db[("db<br/>MySQL 8")]
+        app --> redis[("redis<br/>cache, sessions, queue")]
+        queue --> db
+        queue --> redis
+    end
+```
+
+**Multi-stage build.** Dependencies and assets are compiled in an isolated `builder` stage (`composer install --no-dev` and `npm run build`), so the final images contain no Node, Composer, or build tooling. The `web-production` image copies only the compiled `public/` directory from the builder, which makes the Nginx container immutable and lets it serve static files directly, without involving PHP.
+
+**Network isolation.** `db` and `redis` publish no ports. They are unreachable from the host machine and communicate exclusively with `app` and `queue` over the internal `proposalkit-prod` network. The only published port is the `web` service, bound to `NGINX_PORT` (default `80`).
+
+Configure the environment. Set strong values for `DB_PASSWORD` and `REDIS_PASSWORD`, and set `APP_URL` to your public HTTPS URL:
+
+```bash
+cp .env.production.example .env
+docker compose -f compose.prod.yaml run --rm --no-deps app php artisan key:generate --show
+```
+
+Paste the generated key into `APP_KEY` in `.env`, then build and start the stack:
+
+```bash
+docker compose -f compose.prod.yaml up -d --build
+docker compose -f compose.prod.yaml exec app php artisan migrate --force
+docker compose -f compose.prod.yaml exec app php artisan db:seed --force
+```
+
+> [!WARNING]
+> Destructive commands such as `migrate:fresh` and `db:wipe` are blocked in production (`DB::prohibitDestructiveCommands`). Use `migrate --force` for schema changes. The `db:seed` step loads the live demo data and can be skipped for a clean installation.
+
+**Reverse proxy (aaPanel, bare Nginx, etc.).** In production the stack is meant to sit behind a TLS-terminating reverse proxy that forwards traffic to `127.0.0.1:${NGINX_PORT}`. The inner Nginx speaks plain HTTP, so the proxy must forward the original scheme. Without `X-Forwarded-Proto` and `X-Forwarded-Ssl`, Laravel generates `http://` asset and signed URLs and browsers block them as Mixed Content.
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:39001;   # NGINX_PORT from .env
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Ssl on;
+}
+```
+
+The application trusts these headers through `trustProxies(at: '*')` in `bootstrap/app.php`. This is safe only while the `web` container is reachable exclusively through your proxy, so keep `NGINX_PORT` bound behind your firewall and never expose it directly.
+
+## Development
+
+Day-to-day commands for the [native setup](#1-localhost-deployment-native). For Docker, prefix PHP commands with `docker compose exec app` as described [above](#2-localhost-deployment-docker-development).
+
+Build production assets locally:
+
+```bash
+npm run build
 ```
 
 ## Quality Gates
@@ -150,3 +302,7 @@ npm run lint:check
 
 - [Architecture & Technical Standards](docs/ARCHITECTURE.md)
 - [ADR: Enforce PHP 8.4 for Modern Packages](docs/decisions/001-enforce-php84-for-modern-packages.md)
+
+## License
+
+ProposalKit is open-sourced software licensed under the [MIT license](LICENSE).
