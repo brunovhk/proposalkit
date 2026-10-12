@@ -10,6 +10,9 @@ services:
                 UID: ${UID:-1000}
                 GID: ${GID:-1000}
         user: "${UID}:${GID}"
+        environment:
+            DB_HOST: db
+            DB_PORT: "3306"
         volumes:
             - .:/var/www/html
         expose:
