@@ -264,14 +264,12 @@ final readonly class ProposalAnalyticsService
             $client = $proposal->client;
             $clientId = $client->id;
 
-            if (! isset($clients[$clientId])) {
-                $clients[$clientId] = [
-                    'client_id' => $clientId,
-                    'client_name' => $client->name,
-                    'accepted_count' => 0,
-                    'revenue_cents' => 0,
-                ];
-            }
+            $clients[$clientId] ??= [
+                'client_id' => $clientId,
+                'client_name' => $client->name,
+                'accepted_count' => 0,
+                'revenue_cents' => 0,
+            ];
 
             $clients[$clientId]['accepted_count']++;
             $clients[$clientId]['revenue_cents'] += $this->proposalValueCents($proposal);
@@ -324,7 +322,7 @@ final readonly class ProposalAnalyticsService
                 'items',
                 'events' => static fn ($query) => $query
                     ->whereIn('type', ['created', 'accepted'])
-                    ->orderBy('occurred_at'),
+                    ->oldest('occurred_at'),
             ])
             ->whereBelongsTo($tenant)
             ->where('status', Accepted::$name)
