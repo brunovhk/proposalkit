@@ -1,4 +1,8 @@
-# ProposalKit
+<p align="center">
+  <img src="public/favicon.svg" alt="ProposalKit logo" width="72" height="72">
+</p>
+
+<h1 align="center">ProposalKit</h1>
 
 [![CI](https://github.com/brunovhk/proposalkit/actions/workflows/ci.yml/badge.svg)](https://github.com/brunovhk/proposalkit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -22,7 +26,7 @@ The demo signs you in with one click from the landing page and runs against fict
 
 - Multi-tenant workspace isolation backed by a single database, tenant-aware models, and dedicated isolation tests.
 - Service catalog management for tenant-owned billable services and pricing defaults.
-- Client management for tenant-owned customer records.
+- Client management for tenant-owned customer records. Clients are soft deleted, so archiving one hides it from lists and selects while existing proposals keep their client history.
 - Proposal builder with itemized pricing, totals, validity windows, and controlled lifecycle transitions.
 - Asynchronous proposal PDF generation and delivery workflows.
 - Secure public proposal experience for unauthenticated recipients using signed URLs, typed-name acceptance, rejection capture, PDF download, and replay protection.
